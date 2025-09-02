@@ -26,7 +26,7 @@
         {% for field in form %}
         <div class="input-group mb-3">
           {% if field.name == 'username' %}
-            <input type="email" class="form-control" placeholder="Email" name="{{ field.name }}" value="{{ field.value|default:'' }}" required>
+            <input type="text" class="form-control" placeholder="Username" name="{{ field.name }}" value="{{ field.value|default:'' }}" required>
           {% elif field.name == 'password' %}
             <input type="password" class="form-control" placeholder="Password" name="{{ field.name }}" required>
           {% else %}
@@ -34,7 +34,7 @@
           {% endif %}
           <div class="input-group-append">
             <div class="input-group-text">
-              <span class="fas {% if field.name == 'username' %} fa-envelope {% else %} fa-lock {% endif %}"></span>
+              <span class="fas {% if field.name == 'username' %} fa-user {% else %} fa-lock {% endif %}"></span>
             </div>
           </div>
         </div>
