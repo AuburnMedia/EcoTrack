@@ -1,77 +1,137 @@
 {% extends 'layouts/auth_base.html' %}
 
-{% block title %} Log in {% endblock title %}
+{% block title %} EcoTrack - Sign In {% endblock title %}
 
 {% block bodyclass %} login-page {% endblock bodyclass %}
 
 {% block content %}
 <div class="login-box">
   <div class="login-logo">
-    <a href="/"><b>Admin</b>LTE</a>
+    <h1><b>EcoTrack</b></h1>
   </div>
   <!-- /.login-logo -->
   <div class="card">
     <div class="card-body login-card-body">
-      <p class="login-box-msg">Sign in to start your session</p>
+      <h4 class="login-box-msg text-center mb-4">Sign In</h4>
 
       <form method="post">
         {% csrf_token %}
 
         {% if form.non_field_errors %}
           {% for error in form.non_field_errors  %}
-            <small class="text-danger mb-3">{{ error }}</small>
+            <div class="alert alert-danger">{{ error }}</div>
           {% endfor %}
         {% endif %}
 
         {% for field in form %}
         <div class="input-group mb-3">
-          {{field}}
+          {% if field.name == 'username' %}
+            <input type="email" class="form-control" placeholder="Email" name="{{ field.name }}" value="{{ field.value|default:'' }}" required>
+          {% elif field.name == 'password' %}
+            <input type="password" class="form-control" placeholder="Password" name="{{ field.name }}" required>
+          {% else %}
+            {{ field }}
+          {% endif %}
           <div class="input-group-append">
             <div class="input-group-text">
-              <span class="fas {% if field.name == 'username' %} fa-user {% else %}  fa-lock {% endif %}"></span>
+              <span class="fas {% if field.name == 'username' %} fa-envelope {% else %} fa-lock {% endif %}"></span>
             </div>
           </div>
         </div>
-        <small class="text-danger">{{ field.errors }}</small>
+        {% if field.errors %}
+          <small class="text-danger mb-2 d-block">{{ field.errors.0 }}</small>
+        {% endif %}
         {% endfor %}
+        
         <div class="row">
-          <div class="col-8">
-            <div class="icheck-primary">
-              <input type="checkbox" id="remember">
-              <label for="remember">
-                Remember Me
-              </label>
-            </div>
-          </div>
-          <!-- /.col -->
-          <div class="col-4">
+          <div class="col-12 mb-3">
             <button type="submit" class="btn btn-primary btn-block">Sign In</button>
           </div>
-          <!-- /.col -->
         </div>
       </form>
 
-      <!--
-      <div class="social-auth-links text-center mb-3">
-        <p>- OR -</p>
-        <a href="#" class="btn btn-block btn-primary">
-          <i class="fab fa-facebook mr-2"></i> Sign in using Facebook
-        </a>
-        <a href="#" class="btn btn-block btn-danger">
-          <i class="fab fa-google-plus mr-2"></i> Sign in using Google+
-        </a>
-      </div>
-      -->
-      <!-- /.social-auth-links -->
-
-      <p class="mt-5 mb-2 text-center">
-        <a href="{% url 'password_reset' %}">Reset Pass</a>
-        &bull;
-        <a href="{% url 'register' %}" class="text-center">Sign UP</a>
+      <p class="text-center">
+        <a href="{% url 'register' %}" class="text-primary">Register a new user</a>
       </p>
     </div>
     <!-- /.login-card-body -->
   </div>
 </div>
+
+<style>
+  .login-box {
+    width: 400px;
+    margin: 10% auto;
+  }
+  
+  .login-logo h1 {
+    font-size: 2rem;
+    color: #333;
+    text-align: center;
+    margin-bottom: 2rem;
+    font-weight: 300;
+  }
+  
+  .card {
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+  }
+  
+  .login-card-body {
+    padding: 2rem;
+  }
+  
+  .login-box-msg {
+    color: #666;
+    font-weight: 400;
+  }
+  
+  .form-control {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 12px 15px;
+    font-size: 14px;
+  }
+  
+  .form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  }
+  
+  .input-group-text {
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    color: #666;
+  }
+  
+  .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    padding: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 4px;
+  }
+  
+  .btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+  }
+  
+  .text-primary {
+    color: #007bff !important;
+    text-decoration: none;
+    font-size: 14px;
+  }
+  
+  .text-primary:hover {
+    text-decoration: underline;
+  }
+  
+  body.login-page {
+    background-color: #f5f5f5;
+  }
+</style>
 
 {% endblock %}
