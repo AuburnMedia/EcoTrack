@@ -1,7 +1,7 @@
 {% extends "layouts/base.html" %}
 {% load static %}
 
-{% block title %}Charts{% endblock title %}
+{% block title %}Carbon Usage Charts{% endblock title %}
 
 {% block content %}
 
@@ -11,12 +11,12 @@
       <div class="container-fluid">
           <div class="row mb-2">
               <div class="col-sm-6">
-                  <h1>Charts</h1>
+                  <h1>Carbon Usage Analytics</h1>
               </div>
               <div class="col-sm-6">
                   <ol class="breadcrumb float-sm-right">
                   <li class="breadcrumb-item"><a href="/">Home</a></li>
-                  <li class="breadcrumb-item active"><a href="#">Charts</a></li>
+                  <li class="breadcrumb-item active"><a href="#">Carbon Charts</a></li>
                   </ol>
               </div>
           </div>
@@ -28,31 +28,82 @@
 
         <!-- [ Main Content ] start -->
         <div class="row">
-          <!-- [ Bar Chart ] start -->
+          <!-- [ Carbon Usage by Category Bar Chart ] start -->
           <div class="col-sm-12 col-md-6">
             <div class="card">
               <div class="card-header">
-                <h5>Bar Chart</h5>
+                <h5>Carbon Usage by Category</h5>
+                <small class="text-muted">Your carbon footprint breakdown (kg CO2)</small>
               </div>
               <div class="card-body text-center">
-                <div id="bar-chart"></div>
+                <div id="category-bar-chart"></div>
               </div>
             </div>
           </div>
-          <!-- [ Bar Chart ] end -->
+          <!-- [ Carbon Usage by Category Bar Chart ] end -->
 
-          <!-- [ Pie Chart ] start -->
+          <!-- [ Carbon Usage Pie Chart ] start -->
           <div class="col-sm-12 col-md-6">
             <div class="card">
               <div class="card-header">
-                <h5>Pie Chart</h5>
+                <h5>Carbon Usage Distribution</h5>
+                <small class="text-muted">Percentage breakdown by category</small>
               </div>
               <div class="card-body text-center">
-                <div id="pie-chart"></div>
+                <div id="category-pie-chart"></div>
               </div>
             </div>
           </div>
-          <!-- [ Pie Chart ] end -->
+          <!-- [ Carbon Usage Pie Chart ] end -->
+        </div>
+
+        <div class="row">
+          <!-- [ Monthly Trend Line Chart ] start -->
+          <div class="col-sm-12 col-md-8">
+            <div class="card">
+              <div class="card-header">
+                <h5>Monthly Carbon Usage Trend</h5>
+                <small class="text-muted">Your usage vs. average user (kg CO2)</small>
+              </div>
+              <div class="card-body">
+                <div id="monthly-trend-chart"></div>
+              </div>
+            </div>
+          </div>
+          <!-- [ Monthly Trend Line Chart ] end -->
+
+          <!-- [ Carbon Stats ] start -->
+          <div class="col-sm-12 col-md-4">
+            <div class="card">
+              <div class="card-header">
+                <h5>Carbon Usage Summary</h5>
+              </div>
+              <div class="card-body">
+                <div class="row text-center">
+                  <div class="col-12 mb-3">
+                    <h3 class="text-primary" id="total-usage">1,122.4</h3>
+                    <small class="text-muted">Total kg CO2 this month</small>
+                  </div>
+                  <div class="col-6">
+                    <h5 class="text-success" id="avg-daily">37.4</h5>
+                    <small class="text-muted">Avg. daily kg CO2</small>
+                  </div>
+                  <div class="col-6">
+                    <h5 class="text-warning" id="vs-average">-8.2%</h5>
+                    <small class="text-muted">vs. average user</small>
+                  </div>
+                </div>
+                <hr>
+                <div class="progress mb-2" style="height: 20px;">
+                  <div class="progress-bar bg-success" role="progressbar" style="width: 65%">
+                    65% of goal
+                  </div>
+                </div>
+                <small class="text-muted">Monthly carbon reduction goal</small>
+              </div>
+            </div>
+          </div>
+          <!-- [ Carbon Stats ] end -->
         </div>
         <!-- [ Main Content ] end -->
       </div>
@@ -64,25 +115,133 @@
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script>
   document.addEventListener("DOMContentLoaded", function() {
-    var products = JSON.parse('{{ products|escapejs }}');
-    var names = products.map(p => p.fields.name);
-    var prices = products.map(p => p.fields.price);
+    var carbonData = JSON.parse('{{ carbon_data|escapejs }}');
+    var categoryData = JSON.parse('{{ carbon_by_category|escapejs }}');
+    var monthlyTrend = JSON.parse('{{ monthly_trend|escapejs }}');
 
-    var barOptions = {
-      chart: { type: 'bar', height: 350 },
-      series: [{ name: 'Price', data: prices }],
-      xaxis: { categories: names }
+    // Category Bar Chart
+    var categoryBarOptions = {
+      chart: { 
+        type: 'bar', 
+        height: 350,
+        toolbar: { show: false }
+      },
+      series: [{
+        name: 'Carbon Usage (kg CO2)',
+        data: carbonData.values
+      }],
+      xaxis: { 
+        categories: carbonData.categories,
+        labels: {
+          style: { fontSize: '12px' }
+        }
+      },
+      yaxis: {
+        title: { text: 'kg CO2' }
+      },
+      colors: carbonData.colors,
+      plotOptions: {
+        bar: {
+          borderRadius: 4,
+          horizontal: false,
+        }
+      },
+      dataLabels: {
+        enabled: true,
+        formatter: function (val) {
+          return val.toFixed(1) + ' kg'
+        }
+      },
+      tooltip: {
+        y: {
+          formatter: function (val) {
+            return val.toFixed(1) + ' kg CO2'
+          }
+        }
+      }
     };
-    var barChart = new ApexCharts(document.querySelector("#bar-chart"), barOptions);
-    barChart.render();
+    var categoryBarChart = new ApexCharts(document.querySelector("#category-bar-chart"), categoryBarOptions);
+    categoryBarChart.render();
 
-    var pieOptions = {
-      chart: { type: 'pie', height: 350 },
-      series: prices,
-      labels: names
+    // Category Pie Chart
+    var categoryPieOptions = {
+      chart: { 
+        type: 'pie', 
+        height: 350 
+      },
+      series: carbonData.values,
+      labels: carbonData.categories,
+      colors: carbonData.colors,
+      legend: {
+        position: 'bottom'
+      },
+      tooltip: {
+        y: {
+          formatter: function (val) {
+            return val.toFixed(1) + ' kg CO2'
+          }
+        }
+      },
+      dataLabels: {
+        enabled: true,
+        formatter: function (val, opts) {
+          return val.toFixed(1) + '%'
+        }
+      }
     };
-    var pieChart = new ApexCharts(document.querySelector("#pie-chart"), pieOptions);
-    pieChart.render();
+    var categoryPieChart = new ApexCharts(document.querySelector("#category-pie-chart"), categoryPieOptions);
+    categoryPieChart.render();
+
+    // Monthly Trend Line Chart
+    var monthlyTrendOptions = {
+      chart: { 
+        type: 'line', 
+        height: 350,
+        toolbar: { show: false }
+      },
+      series: [
+        {
+          name: 'Your Usage',
+          data: monthlyTrend.your_usage
+        },
+        {
+          name: 'Average Usage',
+          data: monthlyTrend.average_usage
+        }
+      ],
+      xaxis: { 
+        categories: monthlyTrend.months
+      },
+      yaxis: {
+        title: { text: 'kg CO2' }
+      },
+      colors: ['#007bff', '#6c757d'],
+      stroke: {
+        curve: 'smooth',
+        width: 3
+      },
+      markers: {
+        size: 6
+      },
+      tooltip: {
+        y: {
+          formatter: function (val) {
+            return val.toFixed(1) + ' kg CO2'
+          }
+        }
+      },
+      legend: {
+        position: 'top'
+      }
+    };
+    var monthlyTrendChart = new ApexCharts(document.querySelector("#monthly-trend-chart"), monthlyTrendOptions);
+    monthlyTrendChart.render();
+
+    // Update summary statistics
+    var totalUsage = carbonData.values.reduce((a, b) => a + b, 0);
+    var avgDaily = totalUsage / 30;
+    document.getElementById('total-usage').textContent = totalUsage.toFixed(1);
+    document.getElementById('avg-daily').textContent = avgDaily.toFixed(1);
   });
 </script>
 {% endblock extra_scripts %}
