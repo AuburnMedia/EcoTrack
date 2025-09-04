@@ -3,7 +3,8 @@
 Copyright (c) App-Generator.dev | AppSeed.us
 """
 
-import os, subprocess
+import os
+import subprocess
 from pprint import pp 
 
 # DJANGO Globals
