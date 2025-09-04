@@ -19,11 +19,11 @@ from django.conf import settings
 DYNAMIC_API = {}
 
 try:
-    DYNAMIC_API = getattr(settings, 'DYNAMIC_API') 
-except:     
+    DYNAMIC_API = getattr(settings, 'DYNAMIC_API')
+except AttributeError:
     pass 
 
-from .helpers import Utils 
+from .helpers import Utils
 
 def index(request):
     
