@@ -63,7 +63,18 @@
                 </div>
               </div>
               <div class="card-body">
+                {% if area_chart_data %}
                 <canvas id="areaChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                {% else %}
+                <div class="alert alert-info">
+                  No weekly checkup data available yet.
+                  {% if not initial_survey %}
+                  <a href="{% url 'initial_survey' %}" class="btn btn-primary ml-3">Take Initial Survey</a>
+                  {% else %}
+                  <a href="{% url 'weekly_checkup' %}" class="btn btn-primary ml-3">Start Weekly Checkup</a>
+                  {% endif %}
+                </div>
+                {% endif %}
               </div>
             </div>
             <!-- /.card -->
@@ -86,36 +97,45 @@
                   <thead>
                     <tr>
                       <th>Date</th>
-                      <th>Carbon est.</th>
-                      <th>%</th>
-                      <th>More</th>
+                      <th>Weekly CO₂ (kg)</th>
+                      <th>Change</th>
+                      <th>Monthly Est.</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td>3 weeks ago</td>
-                      <td>13</td>
-                      <td><span class="text-success"><i class="fas fa-arrow-up"></i> 16% 12,000</span></td>
-                      <td><a href="#" class="btn btn-sm btn-default"><i class="fas fa-search"></i></a></td>
-                    </tr>
-                    <tr>
-                      <td>2 weeks ago</td>
-                      <td>29</td>
-                      <td><span class="text-warning"><i class="fas fa-arrow-up"></i> 4% 123,234</span></td>
-                      <td><a href="#" class="btn btn-sm btn-default"><i class="fas fa-search"></i></a></td>
-                    </tr>
-                    <tr>
-                      <td>Last week</td>
-                      <td>1230</td>
-                      <td><span class="text-danger"><i class="fas fa-arrow-down"></i> 3% 108</span></td>
-                      <td><a href="#" class="btn btn-sm btn-default"><i class="fas fa-search"></i></a></td>
-                    </tr>
-                    <tr>
-                      <td>Today <span class="badge badge-danger">NEW</span></td>
-                      <td>199</td>
-                      <td><span class="text-success"><i class="fas fa-arrow-up"></i> 8% 87</span></td>
-                      <td><a href="#" class="btn btn-sm btn-default"><i class="fas fa-search"></i></a></td>
-                    </tr>
+                    {% if previous_results %}
+                      {% for result in previous_results %}
+                      <tr>
+                        <td>
+                          {{ result.date|date:"Y-m-d" }}
+                          {% if forloop.first %}
+                          <span class="badge badge-info">Latest</span>
+                          {% endif %}
+                        </td>
+                        <td>{{ result.carbon|floatformat:1 }}</td>
+                        <td>
+                          {% if result.pct_change %}
+                            {% if result.pct_change < 0 %}
+                            <span class="text-success">
+                              <i class="fas fa-arrow-down"></i> {{ result.pct_change|floatformat:1 }}%
+                            </span>
+                            {% else %}
+                            <span class="text-danger">
+                              <i class="fas fa-arrow-up"></i> +{{ result.pct_change|floatformat:1 }}%
+                            </span>
+                            {% endif %}
+                          {% else %}
+                            —
+                          {% endif %}
+                        </td>
+                        <td>{{ result.monthly_est|floatformat:1 }}</td>
+                      </tr>
+                      {% endfor %}
+                    {% else %}
+                      <tr>
+                        <td colspan="4" class="text-center">No checkup data available yet</td>
+                      </tr>
+                    {% endif %}
                   </tbody>
                 </table>
               </div>
@@ -138,14 +158,27 @@
                 </div>
               </div>
               <div class="card-body">
+                {% if current_usage.weekly_total %}
                 <div class="d-flex justify-content-between align-items-center mb-3">
                   <div>
-                    <h2 class="text-bold mb-0">$18,230.00</h2>
-                    <p class="text-muted mb-0">Carbon Usage Over Time</p>
+                    <h2 class="text-bold mb-0">{{ current_usage.weekly_total|floatformat:1 }}</h2>
+                    <p class="text-muted mb-0">kg CO₂ this week</p>
                   </div>
                   <div class="text-right">
-                    <span class="text-success"><i class="fas fa-arrow-up"></i> 11.1%</span>
-                    <p class="text-muted mb-0 small">Since last month</p>
+                    {% if current_usage.pct_change %}
+                      {% if current_usage.pct_change < 0 %}
+                      <span class="text-success">
+                        <i class="fas fa-arrow-down"></i> {{ current_usage.pct_change|floatformat:1 }}%
+                      </span>
+                      {% else %}
+                      <span class="text-danger">
+                        <i class="fas fa-arrow-up"></i> +{{ current_usage.pct_change|floatformat:1 }}%
+                      </span>
+                      {% endif %}
+                      <p class="text-muted mb-0 small">From last week</p>
+                    {% else %}
+                      <span class="text-muted">No previous data</span>
+                    {% endif %}
                   </div>
                 </div>
                 <canvas id="carbonUsageChart" style="min-height: 180px; height: 180px; max-height: 180px; max-width: 100%;"></canvas>
@@ -155,6 +188,11 @@
                     <span><i class="fas fa-square text-secondary"></i> Average Usage</span>
                   </div>
                 </div>
+                {% else %}
+                <div class="alert alert-info">
+                  No usage data available yet. Complete a weekly checkup to see your carbon usage trends.
+                </div>
+                {% endif %}
               </div>
             </div>
             <!-- /.card -->
@@ -164,13 +202,25 @@
               <div class="card-header">
                 <h3 class="card-title">
                   <i class="fas fa-calculator mr-1"></i>
-                  Use our footprint estimator!
+                  {% if show_estimator %}
+                    Start Tracking Your Carbon Footprint
+                  {% else %}
+                    Weekly Checkup Status
+                  {% endif %}
                 </h3>
               </div>
               <div class="card-body">
-                <p>You haven't taken the checkup ['in' | 'time_since_last'] if time_since_last else ""]</p>
-                <p class="text-muted">Our footprint estimator can estimate your carbon usage in only a few questions.</p>
-                <a href="#" class="btn btn-primary">Go somewhere</a>
+                {% if not initial_survey %}
+                  <p>You haven't taken the initial survey yet!</p>
+                  <p class="text-muted">Complete the initial survey to establish your baseline carbon footprint.</p>
+                  <a href="{% url 'initial_survey' %}" class="btn btn-primary">Take Initial Survey</a>
+                {% else %}
+                    {% if time_since_last is not None %}
+                      <p>Your last checkup was {{ time_since_last }} days ago.</p>
+                    {% endif %}
+                    <p class="text-muted">Track your carbon usage with regular checkups.</p>
+                    <a href="{% url 'weekly_checkup' %}" class="btn btn-primary">Take Weekly Checkup</a>
+                {% endif %}
               </div>
             </div>
             <!-- /.card -->
@@ -179,24 +229,38 @@
             <div class="card">
               <div class="card-header">
                 <h3 class="card-title">
-                  <i class="fas fa-target mr-1"></i>
-                  Goal Progress
+                  <i class="fas fa-bullseye mr-1"></i>
+                  Carbon Reduction Progress
                 </h3>
               </div>
               <div class="card-body">
+                {% if initial_survey and current_usage.monthly_estimate %}
                 <div class="d-flex align-items-center mb-3">
                   <div class="progress-circle mr-3">
                     <canvas id="goalProgressChart" width="80" height="80"></canvas>
                   </div>
                   <div>
-                    <h4 class="text-bold mb-0">X%</h4>
+                    <h4 class="text-bold mb-0">{{ goal_progress|floatformat:1 }}%</h4>
                     <p class="text-muted mb-0">Progress</p>
                   </div>
                 </div>
-                <div class="alert alert-info">
-                  <p class="mb-2"><strong>At this current rate, it will take you 15 weeks to reach your current goal!</strong></p>
-                  <a href="#" class="btn btn-primary btn-sm">Go somewhere</a>
+                <div class="alert {% if goal_progress > 0 %}alert-success{% else %}alert-warning{% endif %}">
+                  {% if goal_progress > 0 %}
+                    <p class="mb-2">
+                      <strong>Great progress! You've reduced your carbon footprint by {{ goal_progress|floatformat:1 }}% from your baseline.</strong>
+                    </p>
+                  {% else %}
+                    <p class="mb-2">
+                      <strong>Your current usage is higher than your baseline. Look for ways to reduce your carbon footprint!</strong>
+                    </p>
+                  {% endif %}
+                  <a href="{% url 'survey_dashboard' %}" class="btn btn-primary btn-sm">View Detailed Progress</a>
                 </div>
+                {% else %}
+                <div class="alert alert-info">
+                  Complete both the initial survey and at least one weekly checkup to track your progress.
+                </div>
+                {% endif %}
               </div>
             </div>
             <!-- /.card -->
@@ -236,147 +300,133 @@
   <script src="{% static 'plugins/summernote/summernote-bs4.min.js' %}"></script>
   <!-- overlayScrollbars -->
   <script src="{% static 'plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js' %}"></script>
-  <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
-  <script src="{% static 'dist/js/pages/dashboard.js' %}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
   
   <script>
-    // Area Chart
-    var areaChartCanvas = $('#areaChart').get(0).getContext('2d');
-    var areaChartData = {
-      labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-      datasets: [
-        {
-          label: 'Dataset 1',
-          backgroundColor: 'rgba(60,141,188,0.9)',
-          borderColor: 'rgba(60,141,188,0.8)',
-          pointRadius: false,
-          pointColor: '#3b8bba',
-          pointStrokeColor: 'rgba(60,141,188,1)',
-          pointHighlightFill: '#fff',
-          pointHighlightStroke: 'rgba(60,141,188,1)',
-          data: [28, 48, 40, 19, 86, 27, 90]
-        },
-        {
-          label: 'Dataset 2',
-          backgroundColor: 'rgba(210, 214, 222, 1)',
-          borderColor: 'rgba(210, 214, 222, 1)',
-          pointRadius: false,
-          pointColor: 'rgba(210, 214, 222, 1)',
-          pointStrokeColor: '#c1c7d1',
-          pointHighlightFill: '#fff',
-          pointHighlightStroke: 'rgba(220,220,220,1)',
-          data: [65, 59, 80, 81, 56, 55, 40]
-        },
-      ]
-    };
-
-    var areaChartOptions = {
-      maintainAspectRatio: false,
-      responsive: true,
-      legend: {
-        display: false
-      },
-      scales: {
-        xAxes: [{
-          gridLines: {
-            display: false,
-          }
-        }],
-        yAxes: [{
-          gridLines: {
-            display: false,
-          }
-        }]
-      }
-    };
-
-    new Chart(areaChartCanvas, {
-      type: 'line',
-      data: areaChartData,
-      options: areaChartOptions
-    });
-
-    // Carbon Usage Bar Chart
-    var carbonUsageCanvas = $('#carbonUsageChart').get(0).getContext('2d');
-    var carbonUsageData = {
-      labels: ['JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'],
-      datasets: [
-        {
-          label: 'Your usage',
-          backgroundColor: '#007bff',
-          data: [1000, 1200, 1800, 1500, 1700, 1600, 1900]
-        },
-        {
-          label: 'Average Usage',
-          backgroundColor: '#6c757d',
-          data: [800, 900, 1000, 950, 1100, 1050, 1200]
+    // Chart initialization function
+    function initCharts(chartData) {
+        console.log("Initializing charts with data:", chartData); // Debugging line
+        if (chartData.areaChart && chartData.areaChart.labels && chartData.areaChart.labels.length > 0) {
+            var areaChartCanvas = $('#areaChart').get(0).getContext('2d');
+            new Chart(areaChartCanvas, {
+                type: 'line',
+                data: {
+                    labels: chartData.areaChart.labels,
+                    datasets: [{
+                        label: 'Weekly CO₂ (kg)',
+                        data: chartData.areaChart.weekly_totals,
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        tension: 0.1,
+                        fill: true
+                    }, {
+                        label: 'Monthly Estimate (kg)',
+                        data: chartData.areaChart.monthly_estimates,
+                        borderColor: 'rgb(255, 99, 132)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        tension: 0.1,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }]
+                    }
+                }
+            });
+        } else {
+            console.log("No area chart data to display."); // Debugging line
         }
-      ]
-    };
 
-    var carbonUsageOptions = {
-      maintainAspectRatio: false,
-      responsive: true,
-      legend: {
-        display: false
-      },
-      scales: {
-        xAxes: [{
-          gridLines: {
-            display: false,
-          }
-        }],
-        yAxes: [{
-          gridLines: {
-            display: false,
-          },
-          ticks: {
-            callback: function(value) {
-              return '$' + value;
+        if (chartData.monthlyData && chartData.monthlyData.length > 0) {
+            var carbonUsageCanvas = $('#carbonUsageChart').get(0).getContext('2d');
+            new Chart(carbonUsageCanvas, {
+                type: 'line',
+                data: {
+                    labels: chartData.monthlyData.map(item => item.month),
+                    datasets: [{
+                        label: 'Monthly Average CO₂ (kg)',
+                        data: chartData.monthlyData.map(item => item.average),
+                        borderColor: 'rgb(54, 162, 235)',
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        tension: 0.1,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }]
+                    }
+                }
+            });
+        } else {
+            console.log("No monthly data to display."); // Debugging line
+        }
+
+        if (chartData.goalProgress !== undefined) {
+            var goalProgressCanvas = $('#goalProgressChart').get(0).getContext('2d');
+            new Chart(goalProgressCanvas, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Progress', 'Remaining'],
+                    datasets: [{
+                        data: [
+                            chartData.goalProgress,
+                            Math.max(0, 100 - chartData.goalProgress)
+                        ],
+                        backgroundColor: ['rgba(40, 167, 69, 0.8)', 'rgba(0, 0, 0, 0.1)']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    cutoutPercentage: 70,
+                    legend: {
+                        display: false
+                    },
+                    tooltips: {
+                        enabled: false
+                    }
+                }
+            });
+        } else {
+            console.log("No goal progress data to display."); // Debugging line
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        try {
+            // Initialize chart data
+            var chartData = {};
+            {% if area_chart_data %}
+                chartData.areaChart = JSON.parse('{{ area_chart_data|escapejs }}');
+            {% endif %}
+            {% if monthly_data %}
+                chartData.monthlyData = JSON.parse('{{ monthly_data|escapejs }}');
+            {% endif %}
+            {% if goal_progress is not None %}
+                chartData.goalProgress = {{ goal_progress }};
+            {% endif %}
+
+            // Initialize charts if we have data
+            if (Object.keys(chartData).length > 0) {
+                initCharts(chartData);
+            } else {
+                console.log("No chart data available."); // Debugging line
             }
-          }
-        }]
-      }
-    };
-
-    new Chart(carbonUsageCanvas, {
-      type: 'bar',
-      data: carbonUsageData,
-      options: carbonUsageOptions
+        } catch (e) {
+            console.error('Error initializing charts:', e);
+        }
     });
-
-    // Goal Progress Doughnut Chart
-    var goalProgressCanvas = $('#goalProgressChart').get(0).getContext('2d');
-    var progressPercentage = 35; // You can make this dynamic
-
-    var goalProgressData = {
-      datasets: [{
-        data: [progressPercentage, 100 - progressPercentage],
-        backgroundColor: ['#28a745', '#e9ecef'],
-        borderWidth: 0
-      }]
-    };
-
-    var goalProgressOptions = {
-      maintainAspectRatio: false,
-      responsive: true,
-      cutoutPercentage: 80,
-      legend: {
-        display: false
-      },
-      tooltips: {
-        enabled: false
-      }
-    };
-
-    new Chart(goalProgressCanvas, {
-      type: 'doughnut',
-      data: goalProgressData,
-      options: goalProgressOptions
-    });
-
-    // Update the X% text with actual percentage
-    $('.progress-circle').next().find('h4').text(progressPercentage + '%');
   </script>
 {% endblock extra_scripts %}
 

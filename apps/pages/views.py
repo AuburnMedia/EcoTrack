@@ -1,9 +1,186 @@
-from django.shortcuts import render
-from django.http import HttpResponse
-
-# Create your views here.
+from django.shortcuts import render, redirect
+from django.http import HttpResponse, JsonResponse
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .forms import InitialSurveyForm, WeeklyCheckupForm
+from .models import InitialSurveyResult, WeeklyCheckupResult
+from .carbon_calculator import CarbonCalculator
+from django.utils import timezone
+from django.db.models import Q
+import json
 
 def index(request):
+    context = {}
+    
+    if request.user.is_authenticated:
+        # Get initial survey and weekly checkups
+        initial_survey = InitialSurveyResult.objects.filter(user=request.user).order_by('-date_submitted').first()
+        weekly_checkups = WeeklyCheckupResult.objects.filter(user=request.user).order_by('-date_submitted')[:12]
+        
+        # Area chart data - last 7 weekly checkups reversed for chronological order
+        last_7_checkups = list(reversed(weekly_checkups[:7])) if weekly_checkups else []
+        if last_7_checkups:
+            area_chart_data = {
+                'labels': [checkup.date_submitted.strftime('%b %d') for checkup in last_7_checkups],
+                'weekly_totals': [float(checkup.weekly_total) for checkup in last_7_checkups],
+                'monthly_estimates': [float(checkup.monthly_estimate) for checkup in last_7_checkups]
+            }
+        else:
+            area_chart_data = None
+        
+        # Previous results for table
+        previous_results = []
+        # Iterate through checkups to calculate percentage change from the previous one
+        for i, checkup in enumerate(weekly_checkups):
+            pct_change = None
+            # Find the previous checkup (the next one in the list, since it's sorted descending)
+            if i + 1 < len(weekly_checkups):
+                prev_checkup = weekly_checkups[i+1]
+                if prev_checkup.weekly_total > 0:
+                    pct_change = ((checkup.weekly_total - prev_checkup.weekly_total) / prev_checkup.weekly_total) * 100
+            
+            previous_results.append({
+                'date': checkup.date_submitted,
+                'carbon': checkup.weekly_total,
+                'pct_change': pct_change,
+                'monthly_est': checkup.monthly_estimate
+            })
+        
+        # Current usage stats
+        latest_checkup = weekly_checkups.first() if weekly_checkups else None
+        current_usage = {
+            'weekly_total': latest_checkup.weekly_total if latest_checkup else 0,
+            'monthly_estimate': latest_checkup.monthly_estimate if latest_checkup else 0,
+            'pct_change': previous_results[0]['pct_change'] if previous_results and 'pct_change' in previous_results[0] else None
+        }
+        
+        # Time since last checkup
+        time_since_last = None
+        if latest_checkup:
+            time_since_last = (timezone.now() - latest_checkup.date_submitted).days
+        
+        # Carbon usage chart data - monthly trend
+        monthly_data = []
+        total_months = min(len(weekly_checkups) // 4, 6)  # Up to 6 months of data
+        for i in range(total_months):
+            month_checkups = weekly_checkups[i*4:(i+1)*4]
+            if month_checkups:
+                avg_total = sum(c.weekly_total for c in month_checkups) / len(month_checkups)
+                monthly_data.append({
+                    'month': month_checkups[0].date_submitted.strftime('%B'),
+                    'average': avg_total
+                })
+        
+        # Calculate goal progress with better handling of edge cases
+        baseline = float(initial_survey.monthly_total) if initial_survey else 0
+        current = float(latest_checkup.monthly_estimate) if latest_checkup else 0
+        goal_progress = 0
+        if baseline > 0 and current > 0:
+            reduction = baseline - current
+            goal_progress = (reduction / baseline) * 100 if reduction > 0 else 0
+        
+        # Ensure time calculations are valid
+        time_since_last = (timezone.now() - latest_checkup.date_submitted).days if latest_checkup else None
+        days_until_next = max(0, 7 - (time_since_last or 0))  # Ensure non-negative
+        
+        context.update({
+            'initial_survey': initial_survey,
+            'area_chart_data': json.dumps(area_chart_data) if area_chart_data else None,
+            'previous_results': previous_results,
+            'current_usage': current_usage,
+            'time_since_last': time_since_last or 0,  # Ensure we don't send None to template
+            'days_until_next': days_until_next,
+            'monthly_data': json.dumps(monthly_data) if monthly_data else None,
+            'goal_progress': round(goal_progress, 1),
+            'show_estimator': not initial_survey or not latest_checkup
+        })
+    
+    return render(request, 'pages/index.html', context)
 
-    # Page from the theme 
-    return render(request, 'pages/index.html')
+@login_required
+def survey_dashboard(request):
+    initial_survey = InitialSurveyResult.objects.filter(user=request.user).order_by('-date_submitted').first()
+    weekly_checkups = WeeklyCheckupResult.objects.filter(user=request.user).order_by('-date_submitted')[:12]
+
+    # Prepare chart data with better error handling
+    chart_data = {
+        'labels': [checkup.date_submitted.strftime('%Y-%m-%d') for checkup in reversed(weekly_checkups)],
+        'weekly_totals': [float(checkup.weekly_total or 0) for checkup in reversed(weekly_checkups)],
+        'monthly_estimates': [float(checkup.monthly_estimate or 0) for checkup in reversed(weekly_checkups)]
+    }
+
+    # JSON serialize the chart data
+    chart_data = {
+        'labels': json.dumps(chart_data['labels']),
+        'weekly_totals': json.dumps(chart_data['weekly_totals']),
+        'monthly_estimates': json.dumps(chart_data['monthly_estimates'])
+    }
+
+    context = {
+        'initial_survey': initial_survey,
+        'weekly_checkups': weekly_checkups,
+        'chart_data': chart_data,
+    }
+    return render(request, 'pages/survey_dashboard.html', context)
+
+@login_required
+def initial_survey(request):
+    # Check if user already has an initial survey
+    if InitialSurveyResult.objects.filter(user=request.user).exists():
+        messages.info(request, "You have already completed the initial survey.")
+        return redirect('survey_dashboard')
+
+    if request.method == 'POST':
+        form = InitialSurveyForm(request.POST)
+        if form.is_valid():
+            survey = form.save(commit=False)
+            survey.user = request.user
+
+            # Calculate carbon footprint
+            data = form.cleaned_data
+            results = CarbonCalculator.calculate_initial_survey(data)
+
+            # Update survey with calculated fields
+            for key, value in results.items():
+                setattr(survey, key, value)
+
+            survey.save()
+            messages.success(request, "Initial survey completed successfully!")
+            return redirect('survey_dashboard')
+    else:
+        form = InitialSurveyForm()
+
+    return render(request, 'pages/initial_survey.html', {'form': form})
+
+@login_required
+def weekly_checkup(request):
+    last_checkup = WeeklyCheckupResult.objects.filter(
+        user=request.user
+    ).order_by('-date_submitted').first()
+
+    # No time restriction for checkups
+
+    if request.method == 'POST':
+        form = WeeklyCheckupForm(request.POST)
+        if form.is_valid():
+            checkup = form.save(commit=False)
+            checkup.user = request.user
+
+            # Get last week's total for comparison
+            last_week_total = last_checkup.weekly_total if last_checkup else None
+
+            # Calculate carbon footprint
+            data = form.cleaned_data
+            results = CarbonCalculator.calculate_weekly_checkup(data, last_week_total)
+
+            # Update checkup with calculated fields
+            for key, value in results.items():
+                setattr(checkup, key, value)
+
+            checkup.save()
+            messages.success(request, "Weekly checkup completed successfully!")
+            return redirect('survey_dashboard')
+    else:
+        form = WeeklyCheckupForm()
+
+    return render(request, 'pages/weekly_checkup.html', {'form': form})
