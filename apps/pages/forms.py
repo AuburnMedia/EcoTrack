@@ -4,7 +4,10 @@ from .models import InitialSurveyResult, WeeklyCheckupResult
 class InitialSurveyForm(forms.ModelForm):
     class Meta:
         model = InitialSurveyResult
-        exclude = ['user', 'monthly_raw_total', 'home_electric_subtotal', 'renewable_discount', 'monthly_total', 'monthly_per_person']
+        exclude = [
+            'user', 'monthly_raw_total', 'home_electric_subtotal',
+            'renewable_discount', 'monthly_total', 'monthly_per_person'
+        ]
         widgets = {
             'household_size': forms.Select(attrs={'class': 'form-control'}),
             'home_type': forms.Select(attrs={'class': 'form-control'}),
@@ -41,7 +44,10 @@ class InitialSurveyForm(forms.ModelForm):
 class WeeklyCheckupForm(forms.ModelForm):
     class Meta:
         model = WeeklyCheckupResult
-        exclude = ['user', 'weekly_raw_total', 'weekly_total', 'pct_change_from_last', 'monthly_estimate']
+        exclude = [
+            'user', 'weekly_raw_total', 'weekly_total',
+            'pct_change_from_last', 'monthly_estimate'
+        ]
         widgets = {
             'appliance_usage': forms.Select(attrs={'class': 'form-control'}),
             'lighting_used': forms.Select(attrs={'class': 'form-control'}),
