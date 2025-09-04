@@ -1,4 +1,7 @@
-import requests, base64, json, csv
+import requests
+import base64
+import json
+import csv
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
@@ -7,15 +10,14 @@ from django.utils.safestring import mark_safe
 from django.conf import settings
 from django.urls import reverse
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-from django.urls import reverse
 from django.views import View
 from django.db import models
-from pprint import pp 
+from pprint import pp
 
 from apps.dyn_dt.models import ModelFilter, PageItems, HideShowFilter
 from apps.dyn_dt.utils import user_filter
-
-from cli import *
+from cli.h_code_parser import name_to_class
+from cli.h_django import get_model_fk, get_model_fk_values
 
 # Create your views here.
 
