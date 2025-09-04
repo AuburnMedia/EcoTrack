@@ -3,11 +3,14 @@
 Copyright (c) App-Generator.dev | AppSeed.us
 """
 
-import os, ast, astor, importlib
+import os
+import ast
+import astor
+import importlib
 
-from .common   import *
-from .h_files  import *
-from .h_util   import *
+from .common import *
+from .h_files import *
+from .h_util import *
 
 def name_to_class(name: str):
 

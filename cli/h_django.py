@@ -3,7 +3,10 @@
 Copyright (c) App-Generator.dev | AppSeed.us
 """
 
-import random, string, time, sys
+import random
+import string
+import time
+import sys
 from datetime import datetime
 import django
 from django.utils import timezone
@@ -44,7 +47,7 @@ def check_db_conn():
             print('Database unavailable, waiting 1 second...')
             time.sleep(1)        
 
-        print('Connecton OK')
+        print('Connection OK')
 
 def get_apps():
     retVal = []
