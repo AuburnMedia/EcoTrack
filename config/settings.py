@@ -62,15 +62,6 @@ INSTALLED_APPS = [
     # Serve UI pages
     "apps.pages",
 
-    # Dynamic DT
-    "apps.dyn_dt",
-
-    # Dynamic API
-    "apps.dyn_api",
-
-    # Charts
-    "apps.charts",
-
     # Tooling API-GEN
     'rest_framework',            # Include DRF           # <-- NEW 
     'rest_framework.authtoken',  # Include DRF Auth      # <-- NEW   

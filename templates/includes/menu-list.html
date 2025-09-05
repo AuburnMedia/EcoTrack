@@ -11,37 +11,16 @@
       </a>
     </li>
 
-    <!-- Home -->
+    <!-- Survey Menu -->
+    {% if request.user.is_authenticated %}
     <li class="nav-item">
-      <a href="{% url 'widgets' %}" class="nav-link {% if 'home' in segment %} active {% endif %}">
-        <i class="nav-icon fas fa-home"></i>
-        <p>Home</p>
+      <a href="{% url 'survey_dashboard' %}" class="nav-link {% if 'survey' in segment %} active {% endif %}">
+        <i class="nav-icon fas fa-clipboard-list"></i>
+        <p>Survey</p>
       </a>
     </li>
+    {% endif %}
 
-    <!-- Detailed Information -->
-    <li class="nav-item">
-      <a href="{% url 'dynamic_dt' %}" class="nav-link {% if 'detailed_information' in segment or 'dynamic_dt' in segment %} active {% endif %}">
-        <i class="nav-icon fas fa-info-circle"></i>
-        <p>Detailed Information</p>
-      </a>
-    </li>
-
-    <!-- Widgets -->
-    <li class="nav-item">
-      <a href="{% url 'widgets' %}" class="nav-link {% if 'widgets' in segment %} active {% endif %}">
-        <i class="nav-icon fas fa-th"></i>
-        <p>Widgets</p>
-      </a>
-    </li>
-
-    <!-- Your Impact -->
-    <li class="nav-item">
-      <a href="{% url 'charts' %}" class="nav-link {% if 'your_impact' in segment or 'charts' in segment %} active {% endif %}">
-        <i class="nav-icon fas fa-leaf"></i>
-        <p>Your Impact</p>
-      </a>
-    </li>
     <!-- Authentication -->
     {% if request.user.is_authenticated %}
     <li class="nav-item">
