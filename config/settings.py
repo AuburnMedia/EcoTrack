@@ -62,13 +62,7 @@ INSTALLED_APPS = [
     # Serve UI pages
     "apps.pages",
 
-    # Dynamic DT
-    "apps.dyn_dt",
-
-    # Dynamic API
-    "apps.dyn_api",
-
-    # Charts
+    # Charts for detailed information
     "apps.charts",
 
     # Tooling API-GEN
