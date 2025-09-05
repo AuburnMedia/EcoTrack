@@ -470,7 +470,7 @@
         });
       }
 
-      // Create carbon usage chart
+      // Create carbon usage chart - shows user's usage trends
       createCarbonUsageChart(data) {
         const canvas = document.getElementById('carbonUsageChart');
         if (!canvas) {
@@ -485,24 +485,45 @@
           this.charts.carbonUsageChart.destroy();
         }
 
+        // Create datasets for user usage and average comparison
+        const userDataset = {
+          label: 'Your Usage',
+          data: data.map(item => item.average),
+          borderColor: this.defaultColors.primary,
+          backgroundColor: this.defaultColors.primary + '20',
+          fill: true,
+          tension: 0.4,
+          borderWidth: 3,
+          pointBackgroundColor: this.defaultColors.primary,
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 2,
+          pointRadius: 5,
+          pointHoverRadius: 7
+        };
+
+        // Calculate a baseline average for comparison (using overall average of user's data)
+        const overallAverage = data.reduce((sum, item) => sum + item.average, 0) / data.length;
+        const averageDataset = {
+          label: 'Average Usage',
+          data: data.map(() => overallAverage),
+          borderColor: this.defaultColors.secondary,
+          backgroundColor: this.defaultColors.secondary + '15',
+          fill: false,
+          tension: 0,
+          borderWidth: 2,
+          borderDash: [5, 5],
+          pointBackgroundColor: this.defaultColors.secondary,
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 1,
+          pointRadius: 3,
+          pointHoverRadius: 5
+        };
+
         this.charts.carbonUsageChart = new Chart(ctx, {
           type: 'line',
           data: {
             labels: data.map(item => item.month),
-            datasets: [{
-              label: 'Monthly Average CO₂ (kg)',
-              data: data.map(item => item.average),
-              borderColor: this.defaultColors.info,
-              backgroundColor: this.defaultColors.info + '20',
-              fill: true,
-              tension: 0.4,
-              borderWidth: 3,
-              pointBackgroundColor: this.defaultColors.info,
-              pointBorderColor: '#ffffff',
-              pointBorderWidth: 2,
-              pointRadius: 5,
-              pointHoverRadius: 7
-            }]
+            datasets: [userDataset, averageDataset]
           },
           options: {
             responsive: true,
@@ -510,7 +531,7 @@
             devicePixelRatio: window.devicePixelRatio || 1,
             plugins: {
               legend: {
-                display: false
+                display: false  // Legend is shown in the template
               },
               tooltip: {
                 backgroundColor: 'rgba(0, 0, 0, 0.8)',
@@ -524,7 +545,7 @@
                 },
                 callbacks: {
                   label: function(context) {
-                    return 'Average: ' + context.parsed.y.toFixed(1) + ' kg CO₂';
+                    return context.dataset.label + ': ' + context.parsed.y.toFixed(1) + ' kg CO₂';
                   }
                 }
               }
@@ -559,6 +580,10 @@
                   }
                 }
               }
+            },
+            interaction: {
+              mode: 'index',
+              intersect: false
             }
           }
         });
