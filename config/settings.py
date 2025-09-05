@@ -62,6 +62,9 @@ INSTALLED_APPS = [
     # Serve UI pages
     "apps.pages",
 
+    # Charts for detailed information
+    "apps.charts",
+
     # Tooling API-GEN
     'rest_framework',            # Include DRF           # <-- NEW 
     'rest_framework.authtoken',  # Include DRF Auth      # <-- NEW   

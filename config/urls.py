@@ -25,6 +25,9 @@ urlpatterns = [
     path('', include('apps.pages.urls')),
     path("admin/", admin.site.urls),
     
+    # Detailed Information (Charts) - renamed from /charts to /detailed
+    path('detailed/', include('apps.charts.urls')),
+    
     # Authentication URLs only (keeping only what's needed from admin_adminlte)
     path('accounts/register/', views.register, name='register'),
     path('accounts/login/', views.UserLoginView.as_view(), name='login'),
