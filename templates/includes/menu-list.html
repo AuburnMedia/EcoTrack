@@ -19,6 +19,14 @@
         <p>Survey</p>
       </a>
     </li>
+    
+    <!-- Detailed Information (Charts) -->
+    <li class="nav-item">
+      <a href="{% url 'charts' %}" class="nav-link {% if 'charts' in segment %} active {% endif %}">
+        <i class="nav-icon fas fa-chart-bar"></i>
+        <p>Detailed Information</p>
+      </a>
+    </li>
     {% endif %}
 
     <!-- Authentication -->
