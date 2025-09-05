@@ -59,16 +59,25 @@ def index(request):
         if latest_checkup:
             time_since_last = (timezone.now() - latest_checkup.date_submitted).days
         
-        # Carbon usage chart data - monthly trend
+        # Carbon usage chart data - improved logic to always show meaningful trend data
         monthly_data = []
-        total_months = min(len(weekly_checkups) // 4, 6)  # Up to 6 months of data
-        for i in range(total_months):
-            month_checkups = weekly_checkups[i*4:(i+1)*4]
-            if month_checkups:
-                avg_total = sum(c.weekly_total for c in month_checkups) / len(month_checkups)
+        if weekly_checkups:
+            # Always show individual weekly data for better visualization
+            # Take the most recent 6 weeks to show a good trend
+            recent_checkups = list(reversed(weekly_checkups[:6]))
+            for i, checkup in enumerate(recent_checkups):
+                # Use relative week labels for better readability
+                weeks_ago = len(recent_checkups) - i - 1
+                if weeks_ago == 0:
+                    label = "This Week"
+                elif weeks_ago == 1:
+                    label = "Last Week"
+                else:
+                    label = f"{weeks_ago} Weeks Ago"
+                
                 monthly_data.append({
-                    'month': month_checkups[0].date_submitted.strftime('%B'),
-                    'average': avg_total
+                    'month': label,
+                    'average': float(checkup.weekly_total)
                 })
         
         # Calculate goal progress with better handling of edge cases
