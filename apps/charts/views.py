@@ -5,9 +5,12 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 from apps.charts.models import CarbonUsage, CarbonGoal
 import json
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 
+
+@login_required
 def index(request):
     # Get carbon usage data for the current user (or sample data if no user)
     current_user = request.user if request.user.is_authenticated else None
