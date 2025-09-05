@@ -8,7 +8,9 @@ from .carbon_calculator import CarbonCalculator
 from django.utils import timezone
 from django.db.models import Q
 import json
+from django.contrib.auth.decorators import login_required
 
+@login_required
 def index(request):
     context = {}
     
