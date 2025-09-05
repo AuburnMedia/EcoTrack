@@ -16,8 +16,6 @@
   <link rel="stylesheet" href="{% static 'plugins/daterangepicker/daterangepicker.css' %}">
   <!-- summernote -->
   <link rel="stylesheet" href="{% static 'plugins/summernote/summernote-bs4.min.css' %}">
-  <!-- Chart.js -->
-  <link rel="stylesheet" href="{% static 'plugins/chart.js/Chart.min.css' %}">
 {% endblock extrastyle %}
 
 {% block bodyclass %} hold-transition sidebar-mini layout-fixed {% endblock bodyclass %}
@@ -282,8 +280,8 @@
     $.widget.bridge('uibutton', $.ui.button)
   </script>
 
-  <!-- ChartJS -->
-  <script src="{% static 'plugins/chart.js/Chart.min.js' %}"></script>
+  <!-- Modern Chart.js v4 - Local Copy -->
+  <script src="{% static 'js/chart.js' %}"></script>
   <!-- Sparkline -->
   <script src="{% static 'plugins/sparklines/sparkline.js' %}"></script>
   <!-- JQVMap -->
@@ -300,132 +298,393 @@
   <script src="{% static 'plugins/summernote/summernote-bs4.min.js' %}"></script>
   <!-- overlayScrollbars -->
   <script src="{% static 'plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js' %}"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
   
   <script>
-    // Chart initialization function
-    function initCharts(chartData) {
-        console.log("Initializing charts with data:", chartData); // Debugging line
-        if (chartData.areaChart && chartData.areaChart.labels && chartData.areaChart.labels.length > 0) {
-            var areaChartCanvas = $('#areaChart').get(0).getContext('2d');
-            new Chart(areaChartCanvas, {
-                type: 'line',
-                data: {
-                    labels: chartData.areaChart.labels,
-                    datasets: [{
-                        label: 'Weekly CO₂ (kg)',
-                        data: chartData.areaChart.weekly_totals,
-                        borderColor: 'rgb(75, 192, 192)',
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                        tension: 0.1,
-                        fill: true
-                    }, {
-                        label: 'Monthly Estimate (kg)',
-                        data: chartData.areaChart.monthly_estimates,
-                        borderColor: 'rgb(255, 99, 132)',
-                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                        tension: 0.1,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        yAxes: [{
-                            ticks: {
-                                beginAtZero: true
-                            }
-                        }]
-                    }
-                }
-            });
-        } else {
-            console.log("No area chart data to display."); // Debugging line
+    // EcoTrack Dashboard Charts - Modern Chart.js v4 Implementation
+    class EcoTrackCharts {
+      constructor() {
+        this.charts = {};
+        this.defaultColors = {
+          primary: '#007bff',
+          success: '#28a745',
+          danger: '#dc3545',
+          warning: '#ffc107',
+          info: '#17a2b8',
+          light: '#f8f9fa',
+          dark: '#343a40',
+          secondary: '#6c757d'
+        };
+      }
+
+      // Initialize all charts when DOM is ready
+      init(chartData) {
+        console.log("Initializing EcoTrack charts with data:", chartData);
+        
+        try {
+          if (chartData.areaChart && chartData.areaChart.labels && chartData.areaChart.labels.length > 0) {
+            this.createAreaChart(chartData.areaChart);
+          } else {
+            console.log("No area chart data available");
+          }
+
+          if (chartData.monthlyData && chartData.monthlyData.length > 0) {
+            this.createCarbonUsageChart(chartData.monthlyData);
+          } else {
+            console.log("No monthly usage data available");
+          }
+
+          if (chartData.goalProgress !== undefined && chartData.goalProgress !== null) {
+            this.createGoalProgressChart(chartData.goalProgress);
+          } else {
+            console.log("No goal progress data available");
+          }
+        } catch (error) {
+          console.error('Error initializing charts:', error);
+        }
+      }
+
+      // Create modern area chart for weekly CO2 trends
+      createAreaChart(data) {
+        const canvas = document.getElementById('areaChart');
+        if (!canvas) {
+          console.error('Area chart canvas not found');
+          return;
         }
 
-        if (chartData.monthlyData && chartData.monthlyData.length > 0) {
-            var carbonUsageCanvas = $('#carbonUsageChart').get(0).getContext('2d');
-            new Chart(carbonUsageCanvas, {
-                type: 'line',
-                data: {
-                    labels: chartData.monthlyData.map(item => item.month),
-                    datasets: [{
-                        label: 'Monthly Average CO₂ (kg)',
-                        data: chartData.monthlyData.map(item => item.average),
-                        borderColor: 'rgb(54, 162, 235)',
-                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                        tension: 0.1,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        yAxes: [{
-                            ticks: {
-                                beginAtZero: true
-                            }
-                        }]
-                    }
-                }
-            });
-        } else {
-            console.log("No monthly data to display."); // Debugging line
+        const ctx = canvas.getContext('2d');
+        
+        // Destroy existing chart if exists
+        if (this.charts.areaChart) {
+          this.charts.areaChart.destroy();
         }
 
-        if (chartData.goalProgress !== undefined) {
-            var goalProgressCanvas = $('#goalProgressChart').get(0).getContext('2d');
-            new Chart(goalProgressCanvas, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Progress', 'Remaining'],
-                    datasets: [{
-                        data: [
-                            chartData.goalProgress,
-                            Math.max(0, 100 - chartData.goalProgress)
-                        ],
-                        backgroundColor: ['rgba(40, 167, 69, 0.8)', 'rgba(0, 0, 0, 0.1)']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    cutoutPercentage: 70,
-                    legend: {
-                        display: false
-                    },
-                    tooltips: {
-                        enabled: false
-                    }
+        this.charts.areaChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: data.labels,
+            datasets: [
+              {
+                label: 'Weekly CO₂ (kg)',
+                data: data.weekly_totals,
+                borderColor: this.defaultColors.primary,
+                backgroundColor: this.defaultColors.primary + '20',
+                fill: true,
+                tension: 0.4,
+                borderWidth: 3,
+                pointBackgroundColor: this.defaultColors.primary,
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 6,
+                pointHoverRadius: 8
+              },
+              {
+                label: 'Monthly Estimate (kg)',
+                data: data.monthly_estimates,
+                borderColor: this.defaultColors.danger,
+                backgroundColor: this.defaultColors.danger + '15',
+                fill: true,
+                tension: 0.4,
+                borderWidth: 2,
+                pointBackgroundColor: this.defaultColors.danger,
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            devicePixelRatio: window.devicePixelRatio || 1,
+            plugins: {
+              legend: {
+                display: true,
+                position: 'top',
+                labels: {
+                  usePointStyle: true,
+                  padding: 20,
+                  font: {
+                    size: 12,
+                    family: 'Source Sans Pro'
+                  }
                 }
-            });
-        } else {
-            console.log("No goal progress data to display."); // Debugging line
+              },
+              tooltip: {
+                mode: 'index',
+                intersect: false,
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                titleFont: {
+                  size: 13,
+                  family: 'Source Sans Pro'
+                },
+                bodyFont: {
+                  size: 12,
+                  family: 'Source Sans Pro'
+                },
+                callbacks: {
+                  label: function(context) {
+                    return context.dataset.label + ': ' + context.parsed.y.toFixed(1) + ' kg';
+                  }
+                }
+              }
+            },
+            scales: {
+              x: {
+                display: true,
+                grid: {
+                  display: true,
+                  color: 'rgba(0, 0, 0, 0.1)'
+                },
+                ticks: {
+                  font: {
+                    size: 11,
+                    family: 'Source Sans Pro'
+                  }
+                }
+              },
+              y: {
+                display: true,
+                beginAtZero: true,
+                grid: {
+                  display: true,
+                  color: 'rgba(0, 0, 0, 0.1)'
+                },
+                ticks: {
+                  font: {
+                    size: 11,
+                    family: 'Source Sans Pro'
+                  },
+                  callback: function(value) {
+                    return value + ' kg';
+                  }
+                }
+              }
+            },
+            interaction: {
+              mode: 'nearest',
+              axis: 'x',
+              intersect: false
+            }
+          }
+        });
+      }
+
+      // Create carbon usage chart - shows user's usage trends
+      createCarbonUsageChart(data) {
+        const canvas = document.getElementById('carbonUsageChart');
+        if (!canvas) {
+          console.error('Carbon usage chart canvas not found');
+          return;
         }
+
+        const ctx = canvas.getContext('2d');
+        
+        // Destroy existing chart if exists
+        if (this.charts.carbonUsageChart) {
+          this.charts.carbonUsageChart.destroy();
+        }
+
+        // Create datasets for user usage and average comparison
+        const userDataset = {
+          label: 'Your Usage',
+          data: data.map(item => item.average),
+          borderColor: this.defaultColors.primary,
+          backgroundColor: this.defaultColors.primary + '20',
+          fill: true,
+          tension: 0.4,
+          borderWidth: 3,
+          pointBackgroundColor: this.defaultColors.primary,
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 2,
+          pointRadius: 5,
+          pointHoverRadius: 7
+        };
+
+        // Calculate a baseline average for comparison (using overall average of user's data)
+        const overallAverage = data.reduce((sum, item) => sum + item.average, 0) / data.length;
+        const averageDataset = {
+          label: 'Average Usage',
+          data: data.map(() => overallAverage),
+          borderColor: this.defaultColors.secondary,
+          backgroundColor: this.defaultColors.secondary + '15',
+          fill: false,
+          tension: 0,
+          borderWidth: 2,
+          borderDash: [5, 5],
+          pointBackgroundColor: this.defaultColors.secondary,
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 1,
+          pointRadius: 3,
+          pointHoverRadius: 5
+        };
+
+        this.charts.carbonUsageChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: data.map(item => item.month),
+            datasets: [userDataset, averageDataset]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            devicePixelRatio: window.devicePixelRatio || 1,
+            plugins: {
+              legend: {
+                display: false  // Legend is shown in the template
+              },
+              tooltip: {
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                titleFont: {
+                  size: 13,
+                  family: 'Source Sans Pro'
+                },
+                bodyFont: {
+                  size: 12,
+                  family: 'Source Sans Pro'
+                },
+                callbacks: {
+                  label: function(context) {
+                    return context.dataset.label + ': ' + context.parsed.y.toFixed(1) + ' kg CO₂';
+                  }
+                }
+              }
+            },
+            scales: {
+              x: {
+                display: true,
+                grid: {
+                  display: false
+                },
+                ticks: {
+                  font: {
+                    size: 10,
+                    family: 'Source Sans Pro'
+                  }
+                }
+              },
+              y: {
+                display: true,
+                beginAtZero: true,
+                grid: {
+                  display: true,
+                  color: 'rgba(0, 0, 0, 0.1)'
+                },
+                ticks: {
+                  font: {
+                    size: 10,
+                    family: 'Source Sans Pro'
+                  },
+                  callback: function(value) {
+                    return value + ' kg';
+                  }
+                }
+              }
+            },
+            interaction: {
+              mode: 'index',
+              intersect: false
+            }
+          }
+        });
+      }
+
+      // Create goal progress doughnut chart
+      createGoalProgressChart(progress) {
+        const canvas = document.getElementById('goalProgressChart');
+        if (!canvas) {
+          console.error('Goal progress chart canvas not found');
+          return;
+        }
+
+        const ctx = canvas.getContext('2d');
+        
+        // Destroy existing chart if exists
+        if (this.charts.goalProgressChart) {
+          this.charts.goalProgressChart.destroy();
+        }
+
+        const progressValue = Math.max(0, Math.min(100, progress));
+        const remainingValue = Math.max(0, 100 - progressValue);
+
+        this.charts.goalProgressChart = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: ['Progress', 'Remaining'],
+            datasets: [{
+              data: [progressValue, remainingValue],
+              backgroundColor: [
+                progress > 0 ? this.defaultColors.success : this.defaultColors.secondary,
+                'rgba(0, 0, 0, 0.1)'
+              ],
+              borderWidth: 0,
+              cutout: '75%'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            devicePixelRatio: window.devicePixelRatio || 1,
+            plugins: {
+              legend: {
+                display: false
+              },
+              tooltip: {
+                enabled: false
+              }
+            },
+            elements: {
+              arc: {
+                borderRadius: 4
+              }
+            }
+          }
+        });
+      }
+
+      // Destroy all charts (cleanup)
+      destroy() {
+        Object.values(this.charts).forEach(chart => {
+          if (chart) chart.destroy();
+        });
+        this.charts = {};
+      }
     }
 
+    // Initialize charts when document is ready
     document.addEventListener('DOMContentLoaded', function() {
-        try {
-            // Initialize chart data
-            var chartData = {};
-            {% if area_chart_data %}
-                chartData.areaChart = JSON.parse('{{ area_chart_data|escapejs }}');
-            {% endif %}
-            {% if monthly_data %}
-                chartData.monthlyData = JSON.parse('{{ monthly_data|escapejs }}');
-            {% endif %}
-            {% if goal_progress is not None %}
-                chartData.goalProgress = {{ goal_progress }};
-            {% endif %}
+      try {
+        // Create charts manager
+        const chartsManager = new EcoTrackCharts();
+        
+        // Prepare chart data from Django template
+        const chartData = {};
+        
+        {% if area_chart_data %}
+          chartData.areaChart = JSON.parse('{{ area_chart_data|escapejs }}');
+        {% endif %}
+        
+        {% if monthly_data %}
+          chartData.monthlyData = JSON.parse('{{ monthly_data|escapejs }}');
+        {% endif %}
+        
+        {% if goal_progress is not None %}
+          chartData.goalProgress = {{ goal_progress }};
+        {% endif %}
 
-            // Initialize charts if we have data
-            if (Object.keys(chartData).length > 0) {
-                initCharts(chartData);
-            } else {
-                console.log("No chart data available."); // Debugging line
-            }
-        } catch (e) {
-            console.error('Error initializing charts:', e);
+        // Initialize charts if we have data
+        if (Object.keys(chartData).length > 0) {
+          chartsManager.init(chartData);
+        } else {
+          console.log("No chart data available for initialization");
         }
+
+        // Store charts manager globally for potential future use
+        window.ecoTrackCharts = chartsManager;
+
+      } catch (error) {
+        console.error('Error setting up EcoTrack charts:', error);
+      }
     });
   </script>
 {% endblock extra_scripts %}
