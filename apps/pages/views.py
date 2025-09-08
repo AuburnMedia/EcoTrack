@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import InitialSurveyForm, WeeklyCheckupForm
 from .models import InitialSurveyResult, WeeklyCheckupResult
+from apps.charts.models import CarbonGoal
 from .carbon_calculator import CarbonCalculator
 from django.utils import timezone
 from django.db.models import Q
@@ -18,6 +19,10 @@ def index(request):
         # Get initial survey and weekly checkups
         initial_survey = InitialSurveyResult.objects.filter(user=request.user).order_by('-date_submitted').first()
         weekly_checkups = WeeklyCheckupResult.objects.filter(user=request.user).order_by('-date_submitted')[:12]
+        
+        # Get current carbon goal
+        current_month = timezone.now().replace(day=1)
+        current_goal = CarbonGoal.objects.filter(user=request.user, month=current_month).first()
         
         # Area chart data - last 7 weekly checkups reversed for chronological order
         last_7_checkups = list(reversed(weekly_checkups[:7])) if weekly_checkups else []
@@ -82,11 +87,16 @@ def index(request):
                     'average': float(checkup.weekly_total)
                 })
         
-        # Calculate goal progress with better handling of edge cases
-        baseline = float(initial_survey.monthly_total) if initial_survey else 0
+        # Calculate goal progress based on current goal if it exists, otherwise use baseline
         current = float(latest_checkup.monthly_estimate) if latest_checkup else 0
         goal_progress = 0
-        if baseline > 0 and current > 0:
+        
+        if current_goal and current_goal.target_amount > 0:
+            # Calculate progress towards current month's goal
+            goal_progress = (current / current_goal.target_amount) * 100
+        elif initial_survey and current > 0:
+            # Fall back to baseline comparison if no goal is set
+            baseline = float(initial_survey.monthly_total)
             reduction = baseline - current
             goal_progress = (reduction / baseline) * 100 if reduction > 0 else 0
         
@@ -94,6 +104,11 @@ def index(request):
         time_since_last = (timezone.now() - latest_checkup.date_submitted).days if latest_checkup else None
         days_until_next = max(0, 7 - (time_since_last or 0))  # Ensure non-negative
         
+        # Update current goal's current_amount if we have a latest checkup
+        if current_goal and latest_checkup:
+            current_goal.current_amount = latest_checkup.monthly_estimate
+            current_goal.save()
+
         context.update({
             'initial_survey': initial_survey,
             'area_chart_data': json.dumps(area_chart_data) if area_chart_data else None,
@@ -103,7 +118,8 @@ def index(request):
             'days_until_next': days_until_next,
             'monthly_data': json.dumps(monthly_data) if monthly_data else None,
             'goal_progress': round(goal_progress, 1),
-            'show_estimator': not initial_survey or not latest_checkup
+            'show_estimator': not initial_survey or not latest_checkup,
+            'current_goal': current_goal
         })
     
     return render(request, 'pages/index.html', context)

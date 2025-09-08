@@ -228,35 +228,44 @@
               <div class="card-header">
                 <h3 class="card-title">
                   <i class="fas fa-bullseye mr-1"></i>
-                  Carbon Reduction Progress
+                  Monthly Carbon Goal
                 </h3>
+                <div class="card-tools">
+                  <a href="{% url 'manage_carbon_goal' %}" class="btn btn-tool" title="Set Goal">
+                    <i class="fas fa-cog"></i>
+                  </a>
+                </div>
               </div>
               <div class="card-body">
-                {% if initial_survey and current_usage.monthly_estimate %}
+                {% if current_goal %}
                 <div class="d-flex align-items-center mb-3">
                   <div class="progress-circle mr-3">
                     <canvas id="goalProgressChart" width="80" height="80"></canvas>
                   </div>
                   <div>
-                    <h4 class="text-bold mb-0">{{ goal_progress|floatformat:1 }}%</h4>
-                    <p class="text-muted mb-0">Progress</p>
+                    <h4 class="text-bold mb-0">{{ current_goal.progress_percentage|floatformat:1 }}%</h4>
+                    <p class="text-muted mb-0">of monthly goal</p>
+                    <p class="text-muted mb-0">Target: {{ current_goal.target_amount|floatformat:1 }} kg CO₂</p>
+                    <p class="text-muted mb-0">Current: {{ current_goal.current_amount|floatformat:1 }} kg CO₂</p>
                   </div>
                 </div>
-                <div class="alert {% if goal_progress > 0 %}alert-success{% else %}alert-warning{% endif %}">
-                  {% if goal_progress > 0 %}
+                <div class="alert {% if current_goal.progress_percentage <= 100 %}alert-success{% else %}alert-warning{% endif %}">
+                  {% if current_goal.progress_percentage <= 100 %}
                     <p class="mb-2">
-                      <strong>Great progress! You've reduced your carbon footprint by {{ goal_progress|floatformat:1 }}% from your baseline.</strong>
+                      <strong>You're on track to meet your monthly carbon goal!</strong>
                     </p>
                   {% else %}
                     <p class="mb-2">
-                      <strong>Your current usage is higher than your baseline. Look for ways to reduce your carbon footprint!</strong>
+                      <strong>You're currently over your monthly carbon goal. Look for ways to reduce your footprint!</strong>
                     </p>
                   {% endif %}
-                  <a href="{% url 'survey_dashboard' %}" class="btn btn-primary btn-sm">View Detailed Progress</a>
+                  <a href="{% url 'manage_carbon_goal' %}" class="btn btn-primary btn-sm">Update Goal</a>
+                  <a href="{% url 'survey_dashboard' %}" class="btn btn-secondary btn-sm">View Details</a>
                 </div>
                 {% else %}
                 <div class="alert alert-info">
-                  Complete both the initial survey and at least one weekly checkup to track your progress.
+                  <p>Set a monthly carbon reduction goal to track your progress!</p>
+                  <a href="{% url 'manage_carbon_goal' %}" class="btn btn-primary">Set Goal</a>
                 </div>
                 {% endif %}
               </div>

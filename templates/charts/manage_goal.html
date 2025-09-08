@@ -1,0 +1,83 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} Manage Carbon Goal {% endblock title %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">Manage Carbon Goal</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Set Your Monthly Carbon Goal</h3>
+                        </div>
+                        <div class="card-body">
+                            <form method="post">
+                                {% csrf_token %}
+                                {% if messages %}
+                                    {% for message in messages %}
+                                        <div class="alert alert-{{ message.tags }}">
+                                            {{ message }}
+                                        </div>
+                                    {% endfor %}
+                                {% endif %}
+                                
+                                <div class="form-group">
+                                    {{ form.target_amount.label_tag }}
+                                    {{ form.target_amount }}
+                                    {% if form.target_amount.help_text %}
+                                        <small class="form-text text-muted">{{ form.target_amount.help_text }}</small>
+                                    {% endif %}
+                                    {% if form.target_amount.errors %}
+                                        <div class="alert alert-danger">
+                                            {{ form.target_amount.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                {% if current_goal and current_goal.current_amount > 0 %}
+                                <div class="alert alert-info">
+                                    <p>Your current carbon usage this month: {{ current_goal.current_amount|floatformat:1 }} kg CO₂</p>
+                                    <p>Progress: {{ current_goal.progress_percentage|floatformat:1 }}%</p>
+                                </div>
+                                {% endif %}
+
+                                <button type="submit" class="btn btn-primary">Save Goal</button>
+                                <a href="{% url 'index' %}" class="btn btn-secondary">Cancel</a>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Tips for Setting Goals</h3>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li class="mb-2">🎯 Set realistic, achievable goals based on your current usage</li>
+                                <li class="mb-2">📈 Aim for gradual reductions (5-10% per month)</li>
+                                <li class="mb-2">📊 Consider your baseline from the initial survey</li>
+                                <li class="mb-2">🔄 Update your goal monthly as you make progress</li>
+                                <li class="mb-2">💡 Use the insights from your weekly checkups</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock content %}

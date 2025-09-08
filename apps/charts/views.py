@@ -1,15 +1,44 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.core import serializers
 from django.db.models import Sum
 from django.utils import timezone
 from datetime import datetime, timedelta
+from django.contrib import messages
 from apps.charts.models import CarbonUsage, CarbonGoal
 from apps.pages.models import InitialSurveyResult, WeeklyCheckupResult
+from .forms import CarbonGoalForm
 import json
 from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 
+
+@login_required
+def manage_carbon_goal(request):
+    # Get or create current month's goal
+    current_month = timezone.now().replace(day=1)
+    goal, created = CarbonGoal.objects.get_or_create(
+        user=request.user,
+        month=current_month,
+        defaults={'target_amount': 0, 'current_amount': 0}
+    )
+    
+    if request.method == 'POST':
+        form = CarbonGoalForm(request.POST, instance=goal)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Carbon goal updated successfully!')
+            return redirect('index')
+    else:
+        form = CarbonGoalForm(instance=goal)
+    
+    context = {
+        'form': form,
+        'current_goal': goal,
+        'parent': 'apps',
+        'segment': 'carbon_goal'
+    }
+    return render(request, 'charts/manage_goal.html', context)
 
 @login_required
 def index(request):
@@ -21,12 +50,17 @@ def index(request):
     carbon_by_category = get_carbon_by_category(current_user)
     monthly_trend = get_monthly_trend(current_user)
     
+    # Get current goal
+    current_month = timezone.now().replace(day=1)
+    current_goal = CarbonGoal.objects.filter(user=current_user, month=current_month).first()
+    
     context = {
         'parent': 'apps',
         'segment': 'charts',
         'carbon_data': json.dumps(carbon_data),
         'carbon_by_category': json.dumps(carbon_by_category),
-        'monthly_trend': json.dumps(monthly_trend)
+        'monthly_trend': json.dumps(monthly_trend),
+        'current_goal': current_goal
     }
     return render(request, 'charts/index.html', context)
 
