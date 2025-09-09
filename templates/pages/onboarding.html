@@ -1,0 +1,88 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Welcome {% endblock %} 
+
+{% block content %}
+
+<div class="content-wrapper bg-white">
+    <div class="content">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-8 text-center my-5">
+                    <h1 class="display-4">Welcome!</h1>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title">Tell us about you</h5>
+                                <p class="card-text text-muted mb-4">We'll use this across our site to give you a personalised experience, and to display on your profile.</p>
+                                
+                                <div class="form-group mb-4">
+                                    {{ form.display_name }}
+                                </div>
+                                
+                                <div class="form-group mb-4">
+                                    {{ form.household_size }}
+                                </div>
+                                
+                                <div class="form-group mb-4">
+                                    <label>What kind of house do you own?</label>
+                                    <div class="mt-2">
+                                        {% for radio in form.house_type %}
+                                        <div class="form-check">
+                                            {{ radio.tag }}
+                                            <label class="form-check-label" for="{{ radio.id_for_label }}">
+                                                {{ radio.choice_label }}
+                                            </label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-header bg-primary"></div>
+                            <div class="card-body">
+                                <h5 class="card-title">Carbon Goals</h5>
+                                <p class="card-text text-muted mb-4">Set a carbon goal to track your progress!</p>
+                                
+                                <p class="mb-4">The average individual carbon footprint is 16 tons! The UN recommends an individual footprint of 2 tons (2,000 kilograms) by 2050 to avoid global warming.</p>
+                                
+                                <div class="form-group">
+                                    {{ form.carbon_goal }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">Get Started</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    // Auto-calculate the suggested monthly carbon goal
+    document.addEventListener('DOMContentLoaded', function() {
+        const householdInput = document.getElementById('{{ form.household_size.id_for_label }}');
+        const carbonGoalInput = document.getElementById('{{ form.carbon_goal.id_for_label }}');
+        
+        householdInput.addEventListener('change', function() {
+            // Calculate suggested monthly goal: 2000kg per year = ~167kg per month
+            const suggestedMonthlyGoal = Math.round(167 * this.value);
+            carbonGoalInput.value = suggestedMonthlyGoal;
+        });
+    });
+</script>
+{% endblock %}
