@@ -243,6 +243,11 @@ def initial_survey(request):
             data = form.cleaned_data
             # Get household size and home type from user profile
             profile = UserProfile.objects.get(user=request.user)
+            
+            if profile.household_size is None or profile.house_type is None:
+                messages.error(request, "Please complete your profile information first")
+                return redirect('onboarding')
+                
             data['household_size'] = profile.household_size
             data['home_type'] = profile.house_type
             results = CarbonCalculator.calculate_initial_survey(data)
