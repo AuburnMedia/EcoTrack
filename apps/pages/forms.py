@@ -17,11 +17,10 @@ class InitialSurveyForm(forms.ModelForm):
         model = InitialSurveyResult
         exclude = [
             'user', 'monthly_raw_total', 'home_electric_subtotal',
-            'renewable_discount', 'monthly_total', 'monthly_per_person'
+            'renewable_discount', 'monthly_total', 'monthly_per_person',
+            'household_size', 'home_type'
         ]
         widgets = {
-            'household_size': forms.Select(attrs={'class': 'form-control'}),
-            'home_type': forms.Select(attrs={'class': 'form-control'}),
             'primary_heating': forms.Select(attrs={'class': 'form-control'}),
             'appliance_use': forms.Select(attrs={'class': 'form-control'}),
             'lighting_type': forms.Select(attrs={'class': 'form-control'}),
@@ -36,8 +35,6 @@ class InitialSurveyForm(forms.ModelForm):
             'buy_secondhand': forms.Select(attrs={'class': 'form-control'}),
         }
         labels = {
-            'household_size': 'How many people live in your household?',
-            'home_type': 'What type of home do you live in?',
             'primary_heating': 'What is your primary heating source?',
             'appliance_use': 'How often do you use high-energy appliances?',
             'lighting_type': 'What type of lighting do you primarily use?',
