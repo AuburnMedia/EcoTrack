@@ -241,7 +241,19 @@ def initial_survey(request):
 
             # Calculate carbon footprint
             data = form.cleaned_data
-            results = CarbonCalculator.calculate_initial_survey(data)
+            try:
+                profile = UserProfile.objects.get(user=request.user)
+            except UserProfile.DoesNotExist:
+                return redirect('onboarding')
+            
+            # Create data dict with profile and form data
+            survey_data = {
+                **data,  # Form data
+                'household_size': profile.household_size,
+                'home_type': profile.house_type
+            }
+            
+            results = CarbonCalculator.calculate_initial_survey(survey_data)
 
             # Update survey with calculated fields
             for key, value in results.items():
