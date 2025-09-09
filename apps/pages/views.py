@@ -54,8 +54,8 @@ def onboarding(request):
                 target_amount=profile.carbon_goal
             )
             
-            messages.success(request, 'Welcome to EcoTrack! Your profile has been set up.')
-            return redirect('index')
+            messages.success(request, 'Welcome to EcoTrack! Now, let\'s gather some information about your carbon footprint.')
+            return redirect('initial_survey')
     else:
         form = UserOnboardingForm(instance=profile)
 
@@ -70,6 +70,11 @@ def index(request):
             return redirect('onboarding')
     except UserProfile.DoesNotExist:
         return redirect('onboarding')
+    
+    # Check if user needs to complete initial survey
+    if not InitialSurveyResult.objects.filter(user=request.user).exists():
+        messages.info(request, "Please complete the initial survey to start tracking your carbon footprint.")
+        return redirect('initial_survey')
 
     context = {}
     
@@ -212,7 +217,17 @@ def survey_dashboard(request):
     return render(request, 'pages/survey_dashboard.html', context)
 
 @login_required
+@login_required
 def initial_survey(request):
+    # Check if user has completed onboarding
+    try:
+        profile = UserProfile.objects.get(user=request.user)
+        if not profile.onboarding_completed:
+            messages.error(request, "Please complete the onboarding process first.")
+            return redirect('onboarding')
+    except UserProfile.DoesNotExist:
+        return redirect('onboarding')
+
     # Check if user already has an initial survey
     if InitialSurveyResult.objects.filter(user=request.user).exists():
         messages.info(request, "You have already completed the initial survey.")
