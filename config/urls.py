@@ -17,8 +17,7 @@ from django.contrib import admin
 from django.urls import include, path
 from admin_adminlte import views
 from django.contrib.auth import views as auth_views
-
-from admin_adminlte import views
+from apps.pages import views as pages_views
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
@@ -28,8 +27,8 @@ urlpatterns = [
     # Detailed Information (Charts) - renamed from /charts to /detailed
     path('detailed/', include('apps.charts.urls')),
     
-    # Authentication URLs only (keeping only what's needed from admin_adminlte)
-    path('accounts/register/', views.register, name='register'),
+    # Authentication URLs
+    path('accounts/register/', pages_views.register, name='register'),
     path('accounts/login/', views.UserLoginView.as_view(), name='login'),
     path('accounts/logout/', views.user_logout_view, name='logout'),
     path('accounts/password-change/', views.UserPasswordChangeView.as_view(), name='password_change'),

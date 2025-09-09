@@ -1,5 +1,16 @@
 from django import forms
-from .models import InitialSurveyResult, WeeklyCheckupResult
+from .models import InitialSurveyResult, WeeklyCheckupResult, UserProfile
+
+class UserOnboardingForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ['display_name', 'household_size', 'house_type', 'carbon_goal']
+        widgets = {
+            'display_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Name'}),
+            'household_size': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Amount of people in your household'}),
+            'house_type': forms.RadioSelect(attrs={'class': 'form-check-input'}),
+            'carbon_goal': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Your carbon goal in kilograms of CO2/month'})
+        }
 
 class InitialSurveyForm(forms.ModelForm):
     class Meta:

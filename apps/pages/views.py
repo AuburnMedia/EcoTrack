@@ -2,9 +2,27 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .forms import InitialSurveyForm, WeeklyCheckupForm
-from .models import InitialSurveyResult, WeeklyCheckupResult
+from django.contrib.auth import login
+from django.contrib.auth.forms import UserCreationForm
+from .forms import InitialSurveyForm, WeeklyCheckupForm, UserOnboardingForm
+from .models import InitialSurveyResult, WeeklyCheckupResult, UserProfile
 from apps.charts.models import CarbonGoal
+from django.urls import reverse
+
+def register(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            # Log the user in after registration
+            login(request, user)
+            # Create an empty profile (onboarding_completed = False)
+            UserProfile.objects.create(user=user)
+            # Redirect to onboarding
+            return redirect('onboarding')
+    else:
+        form = UserCreationForm()
+    return render(request, 'accounts/register.html', {'form': form})
 from .carbon_calculator import CarbonCalculator
 from django.utils import timezone
 from django.db.models import Q
@@ -12,7 +30,38 @@ import json
 from django.contrib.auth.decorators import login_required
 
 @login_required
+def onboarding(request):
+    # Check if user has already completed onboarding
+    try:
+        profile = UserProfile.objects.get(user=request.user)
+        if profile.onboarding_completed:
+            return redirect('index')
+    except UserProfile.DoesNotExist:
+        profile = UserProfile(user=request.user)
+
+    if request.method == 'POST':
+        form = UserOnboardingForm(request.POST, instance=profile)
+        if form.is_valid():
+            profile = form.save(commit=False)
+            profile.onboarding_completed = True
+            profile.save()
+            messages.success(request, 'Welcome to EcoTrack! Your profile has been set up.')
+            return redirect('index')
+    else:
+        form = UserOnboardingForm(instance=profile)
+
+    return render(request, 'pages/onboarding.html', {'form': form})
+
+@login_required
 def index(request):
+    # Check if user needs to complete onboarding
+    try:
+        profile = UserProfile.objects.get(user=request.user)
+        if not profile.onboarding_completed:
+            return redirect('onboarding')
+    except UserProfile.DoesNotExist:
+        return redirect('onboarding')
+
     context = {}
     
     if request.user.is_authenticated:
@@ -92,13 +141,16 @@ def index(request):
         goal_progress = 0
         
         if current_goal and current_goal.target_amount > 0:
-            # Calculate progress towards current month's goal
-            goal_progress = (current / current_goal.target_amount) * 100
+            # Calculate progress towards current month's goal, capped at 100%
+            # For goals, lower values are better so invert the percentage
+            progress = (1 - (current / current_goal.target_amount)) * 100
+            goal_progress = max(0, min(100, progress))  # Clamp between 0 and 100
         elif initial_survey and current > 0:
             # Fall back to baseline comparison if no goal is set
             baseline = float(initial_survey.monthly_total)
             reduction = baseline - current
-            goal_progress = (reduction / baseline) * 100 if reduction > 0 else 0
+            # Only show positive progress (reductions), clamp at 0 for increases
+            goal_progress = max(0, (reduction / baseline) * 100)
         
         # Ensure time calculations are valid
         time_since_last = (timezone.now() - latest_checkup.date_submitted).days if latest_checkup else None
