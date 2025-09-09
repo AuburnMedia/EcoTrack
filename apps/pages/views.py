@@ -241,7 +241,10 @@ def initial_survey(request):
 
             # Calculate carbon footprint
             data = form.cleaned_data
-            profile = UserProfile.objects.get(user=request.user)
+            try:
+                profile = UserProfile.objects.get(user=request.user)
+            except UserProfile.DoesNotExist:
+                return redirect('onboarding')
             
             # Create data dict with profile and form data
             survey_data = {
