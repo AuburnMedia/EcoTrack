@@ -89,9 +89,10 @@ def get_carbon_usage_data(user=None):
                 
             # Energy: home type and heating influence
             energy_factor = 0.35  # Default 35%
-            if initial_survey.home_type == 'APT':
+            profile = UserProfile.objects.get(user=user)
+            if profile.house_type == 'APT':
                 energy_factor = 0.25
-            elif initial_survey.home_type == 'DET':
+            elif profile.house_type == 'LARGE':
                 energy_factor = 0.4
             if initial_survey.renewable_pct >= 50:
                 energy_factor *= 0.7  # Reduce if using renewables
