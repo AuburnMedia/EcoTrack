@@ -5,7 +5,7 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 from django.contrib import messages
 from apps.charts.models import CarbonUsage, CarbonGoal
-from apps.pages.models import InitialSurveyResult, WeeklyCheckupResult
+from apps.pages.models import InitialSurveyResult, WeeklyCheckupResult, UserProfile
 from .forms import CarbonGoalForm
 import json
 from django.contrib.auth.decorators import login_required
@@ -89,11 +89,16 @@ def get_carbon_usage_data(user=None):
                 
             # Energy: home type and heating influence
             energy_factor = 0.35  # Default 35%
-            profile = UserProfile.objects.get(user=user)
-            if profile.house_type == 'APT':
-                energy_factor = 0.25
-            elif profile.house_type == 'LARGE':
-                energy_factor = 0.4
+            try:
+                profile = UserProfile.objects.get(user=user)
+                if profile.house_type == 'APT':
+                    energy_factor = 0.25
+                elif profile.house_type == 'LARGE':
+                    energy_factor = 0.4
+            except UserProfile.DoesNotExist:
+                # Use default energy factor if profile doesn't exist
+                pass
+                
             if initial_survey.renewable_pct >= 50:
                 energy_factor *= 0.7  # Reduce if using renewables
                 
