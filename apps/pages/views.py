@@ -45,6 +45,15 @@ def onboarding(request):
             profile = form.save(commit=False)
             profile.onboarding_completed = True
             profile.save()
+            
+            # Create initial carbon goal
+            current_month = timezone.now().replace(day=1)
+            CarbonGoal.objects.create(
+                user=request.user,
+                month=current_month,
+                target_amount=profile.carbon_goal
+            )
+            
             messages.success(request, 'Welcome to EcoTrack! Your profile has been set up.')
             return redirect('index')
     else:
