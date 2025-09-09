@@ -1,19 +1,25 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+class UserProfile(models.Model):
+    HOUSE_TYPE_CHOICES = [
+        ('LARGE', 'Large house'),
+        ('SMALL', 'Small house'),
+        ('APT', 'Apartment')
+    ]
+    
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    display_name = models.CharField(max_length=100, blank=True)
+    household_size = models.PositiveIntegerField(default=1)  # Default to 1 person
+    house_type = models.CharField(max_length=10, choices=HOUSE_TYPE_CHOICES, default='APT')  # Default to Apartment
+    carbon_goal = models.PositiveIntegerField(help_text="Monthly carbon goal in kilograms of CO2", null=True, blank=True)
+    onboarding_completed = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.user.username}'s Profile"
+
 # Survey Models
 class InitialSurveyResult(models.Model):
-    HOUSEHOLD_CHOICES = [
-        (1, '1'),
-        (2, '2-3'),
-        (4, '4-5'),
-        (6, '6+')
-    ]
-    HOME_TYPE_CHOICES = [
-        ('APT', 'Apartment'),
-        ('SEMI', 'Semi-detached'),
-        ('DET', 'Detached')
-    ]
     HEATING_CHOICES = [
         ('ELEC', 'Electric'),
         ('GAS', 'Gas'),
@@ -85,8 +91,6 @@ class InitialSurveyResult(models.Model):
     date_submitted = models.DateTimeField(auto_now_add=True)
 
     # Survey Questions
-    household_size = models.IntegerField(choices=HOUSEHOLD_CHOICES)
-    home_type = models.CharField(max_length=4, choices=HOME_TYPE_CHOICES)
     primary_heating = models.CharField(max_length=4, choices=HEATING_CHOICES)
     appliance_use = models.CharField(max_length=6, choices=USAGE_FREQ_CHOICES)
     lighting_type = models.CharField(max_length=3, choices=LIGHT_TYPE_CHOICES)

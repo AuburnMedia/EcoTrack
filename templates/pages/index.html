@@ -243,20 +243,24 @@
                     <canvas id="goalProgressChart" width="80" height="80"></canvas>
                   </div>
                   <div>
-                    <h4 class="text-bold mb-0">{{ current_goal.progress_percentage|floatformat:1 }}%</h4>
-                    <p class="text-muted mb-0">of monthly goal</p>
+                    <h4 class="text-bold mb-0">{{ goal_progress|floatformat:1 }}%</h4>
+                    <p class="text-muted mb-0">Progress to Goal</p>
                     <p class="text-muted mb-0">Target: {{ current_goal.target_amount|floatformat:1 }} kg CO₂</p>
                     <p class="text-muted mb-0">Current: {{ current_goal.current_amount|floatformat:1 }} kg CO₂</p>
                   </div>
                 </div>
-                <div class="alert {% if current_goal.progress_percentage <= 100 %}alert-success{% else %}alert-warning{% endif %}">
-                  {% if current_goal.progress_percentage <= 100 %}
+                <div class="alert {% if goal_progress >= 80 %}alert-success{% elif goal_progress >= 50 %}alert-info{% else %}alert-warning{% endif %}">
+                  {% if goal_progress >= 80 %}
                     <p class="mb-2">
-                      <strong>You're on track to meet your monthly carbon goal!</strong>
+                      <strong>Excellent progress! You're well on your way to meeting your carbon reduction goal!</strong>
+                    </p>
+                  {% elif goal_progress >= 50 %}
+                    <p class="mb-2">
+                      <strong>Good progress! Keep working towards your carbon reduction goal.</strong>
                     </p>
                   {% else %}
                     <p class="mb-2">
-                      <strong>You're currently over your monthly carbon goal. Look for ways to reduce your footprint!</strong>
+                      <strong>You can do it! Look for more ways to reduce your carbon footprint to reach your goal.</strong>
                     </p>
                   {% endif %}
                   <a href="{% url 'manage_carbon_goal' %}" class="btn btn-primary btn-sm">Update Goal</a>
