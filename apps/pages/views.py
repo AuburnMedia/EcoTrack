@@ -241,6 +241,10 @@ def initial_survey(request):
 
             # Calculate carbon footprint
             data = form.cleaned_data
+            # Get household size and home type from user profile
+            profile = UserProfile.objects.get(user=request.user)
+            data['household_size'] = profile.household_size
+            data['home_type'] = profile.house_type
             results = CarbonCalculator.calculate_initial_survey(data)
 
             # Update survey with calculated fields

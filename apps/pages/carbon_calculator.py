@@ -3,8 +3,8 @@ class CarbonCalculator:
     MONTHLY_WEIGHTS = {
         'home_type': {
             'APT': 100,
-            'SEMI': 150,
-            'DET': 200
+            'SMALL': 150,
+            'LARGE': 200
         },
         'primary_heating': {
             'ELEC': 150,
