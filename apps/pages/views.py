@@ -216,7 +216,7 @@ def survey_dashboard(request):
     }
     return render(request, 'pages/survey_dashboard.html', context)
 
-@login_required
+
 @login_required
 def initial_survey(request):
     # Check if user has completed onboarding
