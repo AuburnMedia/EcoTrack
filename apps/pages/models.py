@@ -10,8 +10,8 @@ class UserProfile(models.Model):
     
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     display_name = models.CharField(max_length=100, blank=True)
-    household_size = models.PositiveIntegerField(null=True, blank=True)
-    house_type = models.CharField(max_length=10, choices=HOUSE_TYPE_CHOICES, null=True, blank=True)
+    household_size = models.PositiveIntegerField(default=1)  # Default to 1 person
+    house_type = models.CharField(max_length=10, choices=HOUSE_TYPE_CHOICES)  # Required field
     carbon_goal = models.PositiveIntegerField(help_text="Monthly carbon goal in kilograms of CO2", null=True, blank=True)
     onboarding_completed = models.BooleanField(default=False)
 

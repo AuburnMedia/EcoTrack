@@ -7,10 +7,16 @@ class UserOnboardingForm(forms.ModelForm):
         fields = ['display_name', 'household_size', 'house_type', 'carbon_goal']
         widgets = {
             'display_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Name'}),
-            'household_size': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Amount of people in your household'}),
+            'household_size': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Amount of people in your household', 'min': '1', 'required': 'required'}),
             'house_type': forms.RadioSelect(attrs={'class': 'form-check-input'}),
             'carbon_goal': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Your carbon goal in kilograms of CO2/month'})
         }
+
+    def clean_household_size(self):
+        household_size = self.cleaned_data.get('household_size')
+        if household_size is None or household_size < 1:
+            raise forms.ValidationError("Household size must be at least 1")
+        return household_size
 
 class InitialSurveyForm(forms.ModelForm):
     class Meta:
