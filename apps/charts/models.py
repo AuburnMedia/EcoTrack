@@ -40,5 +40,7 @@ class CarbonGoal(models.Model):
     @property
     def progress_percentage(self):
         if self.target_amount > 0:
-            return min(100, (self.current_amount / self.target_amount) * 100)
+            # Enhanced calculation to handle edge cases better
+            progress = (self.current_amount / self.target_amount) * 100
+            return min(100, max(0, progress))  # Ensure it's between 0 and 100
         return 0

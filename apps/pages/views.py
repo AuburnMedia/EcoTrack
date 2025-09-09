@@ -92,8 +92,21 @@ def index(request):
         goal_progress = 0
         
         if current_goal and current_goal.target_amount > 0:
-            # Calculate progress towards current month's goal
-            goal_progress = (current / current_goal.target_amount) * 100
+            # FIX: Don't show progress immediately after onboarding
+            if latest_checkup and (timezone.now() - latest_checkup.date_submitted).days <= 1:
+                # If checkup was just completed (within 1 day), show 0% progress for new users
+                # Check if this is likely the first checkup by seeing if current_amount was 0
+                if current_goal.current_amount == 0:
+                    goal_progress = 0
+                    current_goal.current_amount = 0
+                else:
+                    # Calculate progress towards current month's goal normally
+                    goal_progress = min(100, (current / current_goal.target_amount) * 100)
+                    current_goal.current_amount = current
+            else:
+                # Calculate progress towards current month's goal normally
+                goal_progress = min(100, (current / current_goal.target_amount) * 100)
+                current_goal.current_amount = current
         elif initial_survey and current > 0:
             # Fall back to baseline comparison if no goal is set
             baseline = float(initial_survey.monthly_total)
@@ -106,7 +119,6 @@ def index(request):
         
         # Update current goal's current_amount if we have a latest checkup
         if current_goal and latest_checkup:
-            current_goal.current_amount = latest_checkup.monthly_estimate
             current_goal.save()
 
         context.update({
