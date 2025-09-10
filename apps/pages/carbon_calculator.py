@@ -71,52 +71,62 @@ class CarbonCalculator:
         }
     }
 
-    # Weekly weights for Weekly Checkup
+    # Weekly weights for Weekly Checkup (in kg CO2e)
     WEEKLY_WEIGHTS = {
+        'heating_usage': {
+            'OFF': 0,        # No heating/cooling needed
+            'ECO': 15,       # Minimal usage with eco settings
+            'SOME': 30,      # Moderate usage
+            'MOST': 60       # Heavy usage
+        },
         'appliance_usage': {
-            'NONE': 0,
-            '1-2': 5,
-            '3-5': 15,
-            'DAILY': 30
+            'OPT': 10,       # Optimized usage
+            'REG': 20,       # Regular usage
+            'FREQ': 35,      # Frequent usage
+            'HEAVY': 50      # Heavy usage
         },
-        'lighting_used': {
-            'LED': 1,
-            'MIXED': 5,
-            'CFL': 10,
-            'INC': 20
+        'daily_transport': {
+            'ACTIVE': 0,     # Walking/cycling
+            'PUBLIC': 15,    # Public transport
+            'MIXED': 30,     # Mix of methods
+            'CAR': 50        # Car-dependent
         },
-        'heating_ac_usage': {
-            'NONE': 0,
-            '1-2': 15,
-            '3-5': 30,
-            'DAILY': 50
+        'weekly_travel': {
+            'LOCAL': 10,     # Local only
+            'REGION': 30,    # Regional trips
+            'LONG': 80,      # Long distance
+            'FLIGHT': 200    # Air travel
         },
-        'car_usage': {
-            'NONE': 0,
-            '1-2': 40,
-            '3-5': 80,
-            'DAILY': 150
+        'vehicle_type': {
+            'NONE': 0,       # No car used
+            'ELECTRIC': 5,   # Electric vehicle
+            'HYBRID': 15,    # Hybrid/efficient
+            'STANDARD': 30,  # Standard car
+            'LARGE': 45      # Large vehicle
         },
-        'flights': {
-            'NONE': 0,
-            'SHORT': 200,
-            'LONG': 400
+        'energy_source': {
+            'FULL_GREEN': 5,   # 100% renewable
+            'PARTIAL': 15,     # Partial renewable
+            'GREEN_OPT': 25,   # Green energy plan
+            'STANDARD': 40     # Standard grid
         },
-        'public_transport': {
-            'NONE': 0,
-            '1-2': -10,
-            '3-5': -25,
-            'DAILY': -40
+        'water_usage': {
+            'MINIMAL': 10,     # Very efficient
+            'MODERATE': 20,    # Some conservation
+            'TYPICAL': 35,     # Average usage
+            'HIGH': 50         # High usage
         },
-        'compost_recycle': {
-            'NO': 0,
-            'SOME': -5,
-            'DAILY': -15
+        'waste_generation': {
+            'MINIMAL': 5,      # Minimal waste
+            'LOW': 15,         # Low waste
+            'MEDIUM': 30,      # Average waste
+            'HIGH': 50         # High waste
         },
-        'secondhand_purchases': {
-            'NO': 0,
-            'ONE': -10,
-            'MANY': -20
+        'weekly_consumption': {
+            'NONE': 0,         # No purchases
+            'ESSENTIAL': 10,   # Essential only
+            'MODERATE': 25,    # Some non-essential
+            'HIGH': 45         # High consumption
         }
     }
 
@@ -171,19 +181,36 @@ class CarbonCalculator:
 
     @staticmethod
     def calculate_weekly_checkup(data, last_week_total=None):
-        """Calculate CO2 emissions from weekly checkup data."""
+        """Calculate carbon emissions (in kg CO2e) from weekly checkup data."""
+        # Calculate base emissions from each category
         weekly_raw_total = (
+            CarbonCalculator.WEEKLY_WEIGHTS['heating_usage'][data['heating_usage']] +
             CarbonCalculator.WEEKLY_WEIGHTS['appliance_usage'][data['appliance_usage']] +
-            CarbonCalculator.WEEKLY_WEIGHTS['lighting_used'][data['lighting_used']] +
-            CarbonCalculator.WEEKLY_WEIGHTS['heating_ac_usage'][data['heating_ac_usage']] +
-            CarbonCalculator.WEEKLY_WEIGHTS['car_usage'][data['car_usage']] +
-            CarbonCalculator.WEEKLY_WEIGHTS['flights'][data['flights']] +
-            CarbonCalculator.WEEKLY_WEIGHTS['public_transport'][data['public_transport']] +
-            CarbonCalculator.WEEKLY_WEIGHTS['compost_recycle'][data['compost_recycle']] +
-            CarbonCalculator.WEEKLY_WEIGHTS['secondhand_purchases'][data['secondhand_purchases']]
+            CarbonCalculator.WEEKLY_WEIGHTS['daily_transport'][data['daily_transport']] +
+            CarbonCalculator.WEEKLY_WEIGHTS['weekly_travel'][data['weekly_travel']] +
+            CarbonCalculator.WEEKLY_WEIGHTS['vehicle_type'][data['vehicle_type']] +
+            CarbonCalculator.WEEKLY_WEIGHTS['energy_source'][data['energy_source']] +
+            CarbonCalculator.WEEKLY_WEIGHTS['water_usage'][data['water_usage']] +
+            CarbonCalculator.WEEKLY_WEIGHTS['waste_generation'][data['waste_generation']] +
+            CarbonCalculator.WEEKLY_WEIGHTS['weekly_consumption'][data['weekly_consumption']]
         )
 
-        weekly_total = weekly_raw_total  # In this version, no weekly renewable discount
+        # Apply efficiency bonuses
+        weekly_total = weekly_raw_total
+        
+        # Renewable energy bonus (20% reduction if using full green energy)
+        if data['energy_source'] == 'FULL_GREEN':
+            weekly_total *= 0.8
+        elif data['energy_source'] == 'PARTIAL':
+            weekly_total *= 0.9
+            
+        # Electric vehicle bonus (15% reduction on transport emissions)
+        if data['vehicle_type'] == 'ELECTRIC':
+            transport_component = (
+                CarbonCalculator.WEEKLY_WEIGHTS['daily_transport'][data['daily_transport']] +
+                CarbonCalculator.WEEKLY_WEIGHTS['weekly_travel'][data['weekly_travel']]
+            )
+            weekly_total -= (transport_component * 0.15)
 
         # Calculate percentage change if we have last week's total
         pct_change = None

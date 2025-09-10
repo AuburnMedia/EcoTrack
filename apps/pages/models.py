@@ -115,46 +115,83 @@ class InitialSurveyResult(models.Model):
         return f"{self.user.username}'s Initial Survey - {self.date_submitted.strftime('%Y-%m-%d')}"
 
 class WeeklyCheckupResult(models.Model):
-    USAGE_COUNT_CHOICES = [
-        ('NONE', '0'),
-        ('1-2', '1-2'),
-        ('3-5', '3-5'),
-        ('DAILY', 'Daily')
+    HEATING_CHOICES = [
+        ('OFF', 'Didn\'t need it this week'),
+        ('ECO', 'Used eco settings/timer'),
+        ('SOME', 'A few hours when needed'),
+        ('MOST', 'Most of the day')
     ]
-    LIGHTING_CHOICES = [
-        ('LED', 'All LED'),
-        ('MIXED', 'Mixed'),
-        ('CFL', 'Mostly CFL'),
-        ('INC', 'Mostly incandescent')
+    
+    APPLIANCE_USAGE_CHOICES = [
+        ('OPT', 'Full loads, eco settings'),
+        ('REG', 'Regular loads'),
+        ('FREQ', 'Frequent small loads'),
+        ('HEAVY', 'Multiple loads daily')
     ]
-    FLIGHT_CHOICES = [
-        ('NONE', 'None'),
-        ('SHORT', 'Short'),
-        ('LONG', 'Long')
+    
+    TRANSPORT_CHOICES = [
+        ('ACTIVE', 'Mostly walk/cycle'),
+        ('PUBLIC', 'Mainly public transport'),
+        ('MIXED', 'Mix of car and alternatives'),
+        ('CAR', 'Primarily car')
     ]
-    COMPOST_CHOICES = [
-        ('NO', 'No'),
-        ('SOME', 'Some'),
-        ('DAILY', 'Every day')
+    
+    DISTANCE_CHOICES = [
+        ('LOCAL', 'Stayed local (<20km)'),
+        ('REGION', 'Regional trips (20-100km)'),
+        ('LONG', 'Long distance (>100km)'),
+        ('FLIGHT', 'Took a flight')
     ]
-    SECONDHAND_CHOICES = [
-        ('NO', 'No'),
-        ('ONE', '1 item'),
-        ('MANY', '2+ items')
+    
+    CAR_TYPE_CHOICES = [
+        ('NONE', 'No car used'),
+        ('ELECTRIC', 'Electric vehicle'),
+        ('HYBRID', 'Hybrid/Small efficient car'),
+        ('STANDARD', 'Standard car'),
+        ('LARGE', 'Large vehicle/SUV')
+    ]
+    
+    ENERGY_SOURCE_CHOICES = [
+        ('FULL_GREEN', '100% renewable/solar'),
+        ('PARTIAL', 'Partial renewable mix'),
+        ('GREEN_OPT', 'Green energy plan'),
+        ('STANDARD', 'Standard grid power')
+    ]
+    
+    WATER_USAGE_CHOICES = [
+        ('MINIMAL', 'Quick showers, minimal usage'),
+        ('MODERATE', 'Moderate usage, some conservation'),
+        ('TYPICAL', 'Typical household usage'),
+        ('HIGH', 'Extended usage, multiple daily')
+    ]
+    
+    WASTE_CHOICES = [
+        ('MINIMAL', 'Minimal waste, mostly reusable'),
+        ('LOW', 'Small bag, mostly recycled'),
+        ('MEDIUM', 'Regular bin amount'),
+        ('HIGH', 'Multiple bags/overflow')
+    ]
+    
+    CONSUMPTION_CHOICES = [
+        ('NONE', 'No new purchases'),
+        ('ESSENTIAL', 'Only essentials'),
+        ('MODERATE', 'Some non-essential items'),
+        ('HIGH', 'Multiple large purchases')
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     date_submitted = models.DateTimeField(auto_now_add=True)
 
     # Survey Questions
-    appliance_usage = models.CharField(max_length=5, choices=USAGE_COUNT_CHOICES)
-    lighting_used = models.CharField(max_length=5, choices=LIGHTING_CHOICES)
-    heating_ac_usage = models.CharField(max_length=5, choices=USAGE_COUNT_CHOICES)
-    car_usage = models.CharField(max_length=5, choices=USAGE_COUNT_CHOICES)
-    flights = models.CharField(max_length=5, choices=FLIGHT_CHOICES)
-    public_transport = models.CharField(max_length=5, choices=USAGE_COUNT_CHOICES)
-    compost_recycle = models.CharField(max_length=5, choices=COMPOST_CHOICES)
-    secondhand_purchases = models.CharField(max_length=4, choices=SECONDHAND_CHOICES)
+    heating_usage = models.CharField(max_length=6, choices=HEATING_CHOICES)
+    appliance_usage = models.CharField(max_length=6, choices=APPLIANCE_USAGE_CHOICES)
+    daily_transport = models.CharField(max_length=6, choices=TRANSPORT_CHOICES)
+    weekly_travel = models.CharField(max_length=6, choices=DISTANCE_CHOICES)
+    vehicle_type = models.CharField(max_length=8, choices=CAR_TYPE_CHOICES)
+    energy_source = models.CharField(max_length=10, choices=ENERGY_SOURCE_CHOICES)
+    water_usage = models.CharField(max_length=8, choices=WATER_USAGE_CHOICES)
+    waste_generation = models.CharField(max_length=8, choices=WASTE_CHOICES)
+    weekly_consumption = models.CharField(max_length=9, choices=CONSUMPTION_CHOICES)
 
     # Calculated Fields
     weekly_raw_total = models.FloatField()
