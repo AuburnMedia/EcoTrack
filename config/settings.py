@@ -11,8 +11,6 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 import os
-import random
-import string
 from pathlib import Path
 from dotenv import load_dotenv
 from str2bool import str2bool

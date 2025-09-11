@@ -43,13 +43,13 @@ class Command(BaseCommand):
             self.stdout.write(f"- Carbon goals: {goals_count}")
             try:
                 profile = UserProfile.objects.get(user=user)
-                self.stdout.write(f"- User profile")
+                self.stdout.write("- User profile")
             except UserProfile.DoesNotExist:
                 pass
             try:
                 survey = InitialSurveyResult.objects.filter(user=user).exists()
                 if survey:
-                    self.stdout.write(f"- Initial survey")
+                    self.stdout.write("- Initial survey")
             except:
                 pass
 

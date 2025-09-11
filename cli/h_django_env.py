@@ -91,7 +91,7 @@ def env_delete(aEnvVar):
     env_p = []
     for line in env:
         # module laready there, update version
-        if not (aEnvVar + "=") in line:
+        if (aEnvVar + "=") not in line:
             env_p.append(line)
 
     file_write(FILE_DJ_ENV, env_p)

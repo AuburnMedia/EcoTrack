@@ -45,7 +45,7 @@ def cfg_save(FILE_PATH, aContent):
 
         file_write(FILE_PATH, file_content)
 
-    except Exception as e:
+    except Exception:
         retcode = COMMON.ERR
 
     return retcode
@@ -117,7 +117,7 @@ def h_var_typology(content):
     if "=" in content and "{" in content:
         return COMMON.CFG_VAR_DICT
 
-    if "=" in content and not "[" in content and not "}" in content:
+    if "=" in content and "[" not in content and "}" not in content:
         return COMMON.CFG_VAR_SIMPLE
 
     # Default is unknown
