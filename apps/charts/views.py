@@ -9,12 +9,15 @@ from apps.pages.models import InitialSurveyResult, WeeklyCheckupResult, UserProf
 from .forms import CarbonGoalForm
 import json
 from django.contrib.auth.decorators import login_required
+from apps.pages.decorators import onboarding_required
 
 # Create your views here.
 
 
 @login_required
+@onboarding_required
 def manage_carbon_goal(request):
+
     # Get or create current month's goal
     current_month = timezone.now().replace(day=1)
     goal, created = CarbonGoal.objects.get_or_create(
@@ -41,7 +44,9 @@ def manage_carbon_goal(request):
     return render(request, 'charts/manage_goal.html', context)
 
 @login_required
+@onboarding_required
 def index(request):
+
     # Get carbon usage data for the current user
     current_user = request.user if request.user.is_authenticated else None
     
