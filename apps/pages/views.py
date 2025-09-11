@@ -245,11 +245,11 @@ def survey_dashboard(request):
         "-date_submitted"
     )[:12]
 
-    initial_survey = InitialSurveyResult.objects.filter(user=request.user).order_by('-date_submitted').first()
-    weekly_checkups = WeeklyCheckupResult.objects.filter(user=request.user).order_by('-date_submitted')[:12]
+    # Get historical baseline data for Monthly Baseline tracking
+    baseline_surveys = InitialSurveyResult.objects.filter(user=request.user).order_by('date_submitted')[:12]
 
-    # Prepare chart data with better error handling
-    chart_data = {
+    # Prepare weekly progress chart data with better error handling
+    weekly_chart_data = {
         "labels": [
             checkup.date_submitted.strftime("%Y-%m-%d")
             for checkup in reversed(weekly_checkups)
@@ -263,17 +263,43 @@ def survey_dashboard(request):
         ],
     }
 
+    # Prepare monthly baseline chart data
+    baseline_chart_data = {
+        "labels": [
+            survey.date_submitted.strftime("%Y-%m-%d")
+            for survey in baseline_surveys
+        ],
+        "monthly_totals": [
+            float(survey.monthly_total or 0) for survey in baseline_surveys
+        ],
+        "monthly_per_person": [
+            float(survey.monthly_per_person or 0) for survey in baseline_surveys
+        ],
+        "home_electric": [
+            float(survey.home_electric_subtotal or 0) for survey in baseline_surveys
+        ],
+    }
+
     # JSON serialize the chart data
     chart_data = {
-        "labels": json.dumps(chart_data["labels"]),
-        "weekly_totals": json.dumps(chart_data["weekly_totals"]),
-        "monthly_estimates": json.dumps(chart_data["monthly_estimates"]),
+        "labels": json.dumps(weekly_chart_data["labels"]),
+        "weekly_totals": json.dumps(weekly_chart_data["weekly_totals"]),
+        "monthly_estimates": json.dumps(weekly_chart_data["monthly_estimates"]),
+    }
+
+    baseline_chart_data_json = {
+        "labels": json.dumps(baseline_chart_data["labels"]),
+        "monthly_totals": json.dumps(baseline_chart_data["monthly_totals"]),
+        "monthly_per_person": json.dumps(baseline_chart_data["monthly_per_person"]),
+        "home_electric": json.dumps(baseline_chart_data["home_electric"]),
     }
 
     context = {
         "initial_survey": initial_survey,
         "weekly_checkups": weekly_checkups,
+        "baseline_surveys": baseline_surveys,
         "chart_data": chart_data,
+        "baseline_chart_data": baseline_chart_data_json,
     }
     return render(request, "pages/survey_dashboard.html", context)
 

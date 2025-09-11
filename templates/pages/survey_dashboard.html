@@ -102,6 +102,36 @@
                 </div>
             </div>
 
+            <!-- Monthly Baseline Statistics Chart -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Monthly Baseline Statistics</h3>
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            {% if baseline_surveys %}
+                            <div class="alert alert-info mb-3">
+                                <i class="fas fa-info-circle"></i> 
+                                Tracking your monthly baseline changes over time based on initial surveys.
+                            </div>
+                            <canvas id="baselineProgressChart" style="min-height: 300px; height: 300px; max-height: 300px; max-width: 100%;"></canvas>
+                            {% else %}
+                            <div class="alert alert-info">
+                                Complete your initial survey to start tracking monthly baseline statistics.
+                                <a href="{% url 'initial_survey' %}" class="btn btn-primary ml-3">Take Initial Survey</a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Recent Weekly Checkups -->
             <div class="row">
                 <div class="col-12">
@@ -210,6 +240,74 @@ function initProgressChart(chartData) {
     });
 }
 
+// Baseline chart initialization function
+function initBaselineChart(baselineData) {
+    if (!baselineData || !baselineData.labels) return;
+
+    var ctx = document.getElementById('baselineProgressChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: baselineData.labels,
+            datasets: [{
+                label: 'Monthly Total (kg CO₂)',
+                data: baselineData.monthlyTotals,
+                borderColor: 'rgb(54, 162, 235)',
+                backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                tension: 0.1,
+                fill: false
+            }, {
+                label: 'Per Person (kg CO₂)',
+                data: baselineData.monthlyPerPerson,
+                borderColor: 'rgb(255, 206, 86)',
+                backgroundColor: 'rgba(255, 206, 86, 0.1)',
+                tension: 0.1,
+                fill: false
+            }, {
+                label: 'Home Electric (kg CO₂)',
+                data: baselineData.homeElectric,
+                borderColor: 'rgb(153, 102, 255)',
+                backgroundColor: 'rgba(153, 102, 255, 0.1)',
+                tension: 0.1,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            title: {
+                display: true,
+                text: 'Monthly Baseline Statistics Over Time'
+            },
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    },
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'kg CO₂'
+                    }
+                }],
+                xAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Survey Date'
+                    }
+                }]
+            },
+            tooltips: {
+                mode: 'index',
+                intersect: false,
+                callbacks: {
+                    label: function(tooltipItem, data) {
+                        return data.datasets[tooltipItem.datasetIndex].label + ': ' + tooltipItem.value + ' kg CO₂';
+                    }
+                }
+            }
+        }
+    });
+}
+
 // Initialize charts when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
     {% if weekly_checkups %}
@@ -218,10 +316,23 @@ document.addEventListener('DOMContentLoaded', function() {
         weeklyTotals: JSON.parse('{{ chart_data.weekly_totals|escapejs }}'),
         monthlyEstimates: JSON.parse('{{ chart_data.monthly_estimates|escapejs }}')
     };
-    // Initialize chart after all data is loaded
+    // Initialize weekly progress chart after all data is loaded
     setTimeout(function() {
         initProgressChart(chartData);
     }, 0);
+    {% endif %}
+
+    {% if baseline_surveys %}
+    var baselineData = {
+        labels: JSON.parse('{{ baseline_chart_data.labels|escapejs }}'),
+        monthlyTotals: JSON.parse('{{ baseline_chart_data.monthly_totals|escapejs }}'),
+        monthlyPerPerson: JSON.parse('{{ baseline_chart_data.monthly_per_person|escapejs }}'),
+        homeElectric: JSON.parse('{{ baseline_chart_data.home_electric|escapejs }}')
+    };
+    // Initialize baseline chart after all data is loaded
+    setTimeout(function() {
+        initBaselineChart(baselineData);
+    }, 100);
     {% endif %}
 });
 </script>
