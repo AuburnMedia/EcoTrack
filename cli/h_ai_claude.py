@@ -3,13 +3,12 @@
 Copyright (c) App-Generator.dev | AppSeed.us
 """
 
-import random, string, json, statistics, re, pprint, time
-from datetime import datetime
+import json
+import time
 
 from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
 
 from django.conf import settings
-from django.http import JsonResponse
 
 from .common import *
 from .h_util import *

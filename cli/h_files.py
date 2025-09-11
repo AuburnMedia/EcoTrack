@@ -3,7 +3,10 @@
 Copyright (c) AppSeed.us
 """
 
-import os, fnmatch, shutil, json
+import os
+import fnmatch
+import shutil
+import json
 
 from .common import *
 from .h_util import *

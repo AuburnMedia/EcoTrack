@@ -5,7 +5,6 @@ Copyright (c) App-Generator.dev | AppSeed.us
 
 import os
 import subprocess
-from pprint import pp
 
 # DJANGO Globals
 DJANGO_APPS = None
@@ -201,7 +200,7 @@ def exec_subprocess(full_cmd):
 
         retcode = result.check_returncode()
 
-    except Exception as e:
+    except Exception:
         retcode = COMMON.ERR
 
     return retcode

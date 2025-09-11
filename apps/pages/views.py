@@ -1,5 +1,4 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth import login
@@ -7,7 +6,6 @@ from django.contrib.auth.forms import UserCreationForm
 from .forms import InitialSurveyForm, WeeklyCheckupForm, UserOnboardingForm
 from .models import InitialSurveyResult, WeeklyCheckupResult, UserProfile
 from apps.charts.models import CarbonGoal
-from django.urls import reverse
 
 
 def register(request):
@@ -28,9 +26,7 @@ def register(request):
 
 from .carbon_calculator import CarbonCalculator
 from django.utils import timezone
-from django.db.models import Q
 import json
-from django.contrib.auth.decorators import login_required
 
 
 @login_required

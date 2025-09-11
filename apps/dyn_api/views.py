@@ -5,14 +5,11 @@ Copyright (c) 2019 - present AppSeed.us
 
 from django.http import Http404
 
-from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, get_object_or_404
 
 from rest_framework.generics import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from django.http import HttpResponse
 
 from django.conf import settings
 
@@ -162,7 +159,7 @@ class DynamicAPI(APIView):
                 },
                 status=400,
             )
-        except Utils.get_class(DYNAMIC_API, kwargs.get("model_name")).DoesNotExist as e:
+        except Utils.get_class(DYNAMIC_API, kwargs.get("model_name")).DoesNotExist:
             return Response(
                 data={"message": "object with given id not found.", "success": False},
                 status=404,

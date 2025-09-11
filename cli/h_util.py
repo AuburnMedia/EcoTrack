@@ -3,7 +3,8 @@
 Copyright (c) App-Generator.dev | AppSeed.us
 """
 
-import random, string
+import random
+import string
 from datetime import datetime
 
 from .common import *

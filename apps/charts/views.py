@@ -1,10 +1,8 @@
 from django.shortcuts import render, redirect
-from django.core import serializers
-from django.db.models import Sum
 from django.utils import timezone
-from datetime import datetime, timedelta
+from datetime import timedelta
 from django.contrib import messages
-from apps.charts.models import CarbonUsage, CarbonGoal
+from apps.charts.models import CarbonGoal
 from apps.pages.models import InitialSurveyResult, WeeklyCheckupResult, UserProfile
 from .forms import CarbonGoalForm
 import json

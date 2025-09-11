@@ -3,13 +3,8 @@
 Copyright (c) App-Generator.dev | AppSeed.us
 """
 
-import random
-import string
 import time
-import sys
-from datetime import datetime
 import django
-from django.utils import timezone
 from django.contrib.auth import get_user_model
 
 from .common import *
@@ -24,7 +19,6 @@ def get_django():
     from collections import OrderedDict
     from django.apps import apps
     from django.conf import settings
-    from django.core import management
 
     # Needs a single init
     if not apps.ready:
