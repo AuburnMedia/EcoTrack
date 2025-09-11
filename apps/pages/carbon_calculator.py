@@ -1,5 +1,4 @@
 class CarbonCalculator:
-    
     MONTHLY_WEIGHTS = {
         "home_type": {"APT": 4, "SMALL": 6, "LARGE": 8},
         "primary_heating": {"ELEC": 6, "GAS": 10, "OIL": 14, "NONE": 0},
@@ -197,16 +196,16 @@ class CarbonCalculator:
             pct_change = ((weekly_total - last_week_total) / last_week_total) * 100
 
         monthly_estimate = weekly_total * 4
-        
-        # Calculate home electric subtotal for weekly data
+
         home_electric_subtotal = (
             CarbonCalculator.WEEKLY_WEIGHTS["heating_usage"][data["heating_usage"]]
-            + CarbonCalculator.WEEKLY_WEIGHTS["appliance_usage"][data["appliance_usage"]]
+            + CarbonCalculator.WEEKLY_WEIGHTS["appliance_usage"][
+                data["appliance_usage"]
+            ]
             + CarbonCalculator.WEEKLY_WEIGHTS["energy_source"][data["energy_source"]]
             + CarbonCalculator.WEEKLY_WEIGHTS["water_usage"][data["water_usage"]]
         )
-        
-        # Calculate renewable discount based on energy source
+
         renewable_discount = 0
         if data["energy_source"] == "FULL_GREEN":
             renewable_discount = home_electric_subtotal * 0.8  # 80% discount
@@ -214,7 +213,7 @@ class CarbonCalculator:
             renewable_discount = home_electric_subtotal * 0.4  # 40% discount
         elif data["energy_source"] == "GREEN_OPT":
             renewable_discount = home_electric_subtotal * 0.2  # 20% discount
-        
+
         monthly_estimate_per_person = monthly_estimate / household_size
 
         return {
