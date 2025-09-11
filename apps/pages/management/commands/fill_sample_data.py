@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from django.utils import timezone
-from apps.pages.models import WeeklyCheckupResult, UserProfile
+from apps.pages.models import WeeklyCheckupResult, UserProfile, InitialSurveyResult
 from apps.pages.carbon_calculator import CarbonCalculator
 import random
 
@@ -42,6 +42,71 @@ class Command(BaseCommand):
             profile.save()
 
         self.stdout.write(self.style.SUCCESS(f'Updated onboarding data for user {username}'))
+
+
+
+        survey_data = {
+            'home_type': profile.house_type,  
+            'household_size': profile.household_size,  
+            'primary_heating': random.choices(['ELEC', 'GAS', 'OIL', 'NONE'],
+                                          weights=[40, 30, 20, 10])[0],
+            'appliance_use': random.choices(['DAILY', 'WEEKLY', 'OCCAS', 'NEVER'],
+                                        weights=[40, 30, 20, 10])[0],
+            'lighting_type': random.choices(['LED', 'CFL', 'INC', 'MIX'], 
+                                       weights=[40, 30, 10, 20])[0],  # Favor LED
+            'air_conditioning': random.choices(['YES', 'NO'],
+                                          weights=[30, 70])[0],  # Favor no AC
+            'car_type': random.choices(['NONE', 'PETROL', 'DIESEL', 'HYBRID', 'ELEC'],
+                                   weights=[15, 25, 20, 25, 15])[0],
+            'device_time': random.choices(['LT2', '2-4', '4-8', 'GT8'],
+                                     weights=[20, 40, 30, 10])[0],
+            'flights_per_year': random.choices(['NONE', '1SHORT', '2-4SHORT', '1LONG', 'MULTLONG'],
+                                          weights=[30, 35, 20, 10, 5])[0],
+            'public_transport': random.choices(['NEVER', 'OCCAS', 'WEEKLY', 'DAILY'],
+                                          weights=[20, 30, 30, 20])[0],
+            'compost_waste': random.choices(['YES', 'NO'],
+                                       weights=[60, 40])[0],  # Favor composting
+            'clothes_drying': random.choices(['LINE', 'MIXED', 'DRYER'],
+                                        weights=[40, 40, 20])[0],
+            'buy_secondhand': random.choices(['OFTEN', 'SOME', 'RARELY', 'NEVER'],
+                                        weights=[25, 35, 25, 15])[0],
+            'renewable_pct': random.choices([0, 25, 50, 75, 100],
+                                       weights=[15, 25, 30, 20, 10])[0]  
+        }
+
+   
+        results = CarbonCalculator.calculate_initial_survey(survey_data)
+
+
+        db_survey_data = survey_data.copy()
+        db_survey_data.pop('home_type')
+        db_survey_data.pop('household_size')
+
+        survey, created = InitialSurveyResult.objects.get_or_create(
+            user=user,
+            defaults={
+                **db_survey_data,
+                'date_submitted': timezone.now(),
+                'monthly_raw_total': results['monthly_raw_total'],
+                'home_electric_subtotal': results['home_electric_subtotal'],
+                'renewable_discount': results['renewable_discount'],
+                'monthly_total': results['monthly_total'],
+                'monthly_per_person': results['monthly_per_person']
+            }
+        )
+
+        if not created:
+            # Update existing survey (excluding calculation-only fields)
+            for key, value in db_survey_data.items():
+                setattr(survey, key, value)
+            survey.monthly_raw_total = results['monthly_raw_total']
+            survey.home_electric_subtotal = results['home_electric_subtotal']
+            survey.renewable_discount = results['renewable_discount']
+            survey.monthly_total = results['monthly_total']
+            survey.monthly_per_person = results['monthly_per_person']
+            survey.save()
+
+        self.stdout.write(self.style.SUCCESS(f'Created/updated initial survey for user {username}'))
 
         # Choices for each field based on the model's choices
         CHOICES = {
