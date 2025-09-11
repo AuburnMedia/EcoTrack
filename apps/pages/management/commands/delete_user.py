@@ -48,9 +48,8 @@ class Command(BaseCommand):
                 survey = InitialSurveyResult.objects.filter(user=user).exists()
                 if survey:
                     self.stdout.write(f'- Initial survey')
-            except InitialSurveyResult.DoesNotExist:
+            except:
                 pass
-
 
         if not force:
             confirm = input('\nAre you sure you want to delete these users and all their data? [y/N] ')
