@@ -9,19 +9,14 @@ from apps.pages.models import InitialSurveyResult, WeeklyCheckupResult, UserProf
 from .forms import CarbonGoalForm
 import json
 from django.contrib.auth.decorators import login_required
+from apps.pages.decorators import onboarding_required
 
 # Create your views here.
 
 
 @login_required
+@onboarding_required
 def manage_carbon_goal(request):
-    # Check if user needs to complete onboarding
-    try:
-        profile = UserProfile.objects.get(user=request.user)
-        if not profile.onboarding_completed:
-            return redirect('onboarding')
-    except UserProfile.DoesNotExist:
-        return redirect('onboarding')
 
     # Get or create current month's goal
     current_month = timezone.now().replace(day=1)
@@ -49,14 +44,8 @@ def manage_carbon_goal(request):
     return render(request, 'charts/manage_goal.html', context)
 
 @login_required
+@onboarding_required
 def index(request):
-    # Check if user needs to complete onboarding
-    try:
-        profile = UserProfile.objects.get(user=request.user)
-        if not profile.onboarding_completed:
-            return redirect('onboarding')
-    except UserProfile.DoesNotExist:
-        return redirect('onboarding')
 
     # Get carbon usage data for the current user
     current_user = request.user if request.user.is_authenticated else None
