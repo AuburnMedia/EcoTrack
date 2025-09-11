@@ -6,6 +6,8 @@ from django.contrib.auth.forms import UserCreationForm
 from .forms import InitialSurveyForm, WeeklyCheckupForm, UserOnboardingForm
 from .models import InitialSurveyResult, WeeklyCheckupResult, UserProfile
 from apps.charts.models import CarbonGoal
+from django.urls import reverse
+from .decorators import onboarding_required
 
 
 def register(request):
@@ -66,6 +68,7 @@ def onboarding(request):
 
 
 @login_required
+@onboarding_required
 def index(request):
     # Check if user needs to complete onboarding
     try:
@@ -231,6 +234,7 @@ def index(request):
 
 
 @login_required
+@onboarding_required
 def survey_dashboard(request):
     initial_survey = (
         InitialSurveyResult.objects.filter(user=request.user)
@@ -240,6 +244,9 @@ def survey_dashboard(request):
     weekly_checkups = WeeklyCheckupResult.objects.filter(user=request.user).order_by(
         "-date_submitted"
     )[:12]
+
+    initial_survey = InitialSurveyResult.objects.filter(user=request.user).order_by('-date_submitted').first()
+    weekly_checkups = WeeklyCheckupResult.objects.filter(user=request.user).order_by('-date_submitted')[:12]
 
     # Prepare chart data with better error handling
     chart_data = {
@@ -323,14 +330,17 @@ def initial_survey(request):
 
 
 @login_required
+@onboarding_required
 def weekly_checkup(request):
     last_checkup = (
         WeeklyCheckupResult.objects.filter(user=request.user)
         .order_by("-date_submitted")
         .first()
     )
+    last_checkup = WeeklyCheckupResult.objects.filter(
+        user=request.user
+    ).order_by('-date_submitted').first()
 
-    # No time restriction for checkups
 
     if request.method == "POST":
         form = WeeklyCheckupForm(request.POST)
