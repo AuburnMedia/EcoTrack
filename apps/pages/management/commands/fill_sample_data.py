@@ -36,6 +36,10 @@ class Command(BaseCommand):
 
         # Generate 30 weeks of data
         current_date = timezone.now()
+        current_date = current_date - timezone.timedelta(days=current_date.weekday() + 1)
+        # Set to end of day (23:59:59)
+        current_date = current_date.replace(hour=23, minute=59, second=59)
+        
         weeks_created = 0
         last_week_total = None
 
@@ -86,7 +90,10 @@ class Command(BaseCommand):
             # Calculate carbon impact using the CarbonCalculator
             results = CarbonCalculator.calculate_weekly_checkup(data, last_week_total)
             
-            # Create the weekly checkup
+            # Force auto_now_add to use our date by temporarily disabling it
+            WeeklyCheckupResult._meta.get_field('date_submitted').auto_now_add = False
+            
+            # Create the weekly checkup with the specific date
             checkup = WeeklyCheckupResult.objects.create(
                 user=user,
                 date_submitted=date,
@@ -104,6 +111,9 @@ class Command(BaseCommand):
                 pct_change_from_last=results['pct_change_from_last'],
                 monthly_estimate=results['monthly_estimate']
             )
+            
+            # Re-enable auto_now_add for normal operation
+            WeeklyCheckupResult._meta.get_field('date_submitted').auto_now_add = True
 
             last_week_total = results['weekly_total']
             weeks_created += 1
