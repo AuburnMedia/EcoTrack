@@ -35,13 +35,29 @@ class Command(BaseCommand):
         
         if not created:
             # Update existing profile
-            profile.name = username
+            profile.display_name = username
             profile.house_type = 'SMALL'
             profile.carbon_goal = 2000
             profile.onboarding_completed = True
             profile.save()
 
-        self.stdout.write(self.style.SUCCESS(f'Updated onboarding data for user {username}'))
+
+        from apps.charts.models import CarbonGoal
+        current_month = timezone.now().replace(day=1)
+        carbon_goal, goal_created = CarbonGoal.objects.get_or_create(
+            user=user,
+            month=current_month,
+            defaults={
+                'target_amount': profile.carbon_goal,
+                'current_amount': 0,  
+                'achieved': False
+            }
+        )
+        if not goal_created:
+            carbon_goal.target_amount = profile.carbon_goal
+            carbon_goal.save()
+
+        self.stdout.write(self.style.SUCCESS(f'Updated onboarding data and carbon goal for user {username}'))
 
 
 
