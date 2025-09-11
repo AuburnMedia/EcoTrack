@@ -199,9 +199,12 @@ class WeeklyCheckupResult(models.Model):
 
     # Calculated Fields
     weekly_raw_total = models.FloatField()
+    home_electric_subtotal = models.FloatField()
+    renewable_discount = models.FloatField()
     weekly_total = models.FloatField()
     pct_change_from_last = models.FloatField(null=True, blank=True)
     monthly_estimate = models.FloatField()
+    monthly_estimate_per_person = models.FloatField()
 
     def __str__(self):
         return f"{self.user.username}'s Weekly Checkup - {self.date_submitted.strftime('%Y-%m-%d')}"
