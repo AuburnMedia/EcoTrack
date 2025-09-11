@@ -222,7 +222,9 @@ class Command(BaseCommand):
             }
 
             # Calculate carbon impact using the CarbonCalculator
-            results = CarbonCalculator.calculate_weekly_checkup(data, last_week_total, profile.household_size)
+            results = CarbonCalculator.calculate_weekly_checkup(
+                data, last_week_total, profile.household_size
+            )
 
             # Force auto_now_add to use our date by temporarily disabling it
             WeeklyCheckupResult._meta.get_field("date_submitted").auto_now_add = False
