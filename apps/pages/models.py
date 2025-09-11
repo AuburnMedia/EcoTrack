@@ -1,90 +1,93 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
 class UserProfile(models.Model):
     HOUSE_TYPE_CHOICES = [
-        ('LARGE', 'Large house'),
-        ('SMALL', 'Small house'),
-        ('APT', 'Apartment')
+        ("LARGE", "Large house"),
+        ("SMALL", "Small house"),
+        ("APT", "Apartment"),
     ]
-    
+
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     display_name = models.CharField(max_length=100, blank=True)
     household_size = models.PositiveIntegerField(default=1)  # Default to 1 person
-    house_type = models.CharField(max_length=10, choices=HOUSE_TYPE_CHOICES, default='APT')  # Default to Apartment
-    carbon_goal = models.PositiveIntegerField(help_text="Monthly carbon goal in kilograms of CO2", null=True, blank=True)
+    house_type = models.CharField(
+        max_length=10, choices=HOUSE_TYPE_CHOICES, default="APT"
+    )  # Default to Apartment
+    carbon_goal = models.PositiveIntegerField(
+        help_text="Monthly carbon goal in kilograms of CO2", null=True, blank=True
+    )
     onboarding_completed = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.user.username}'s Profile"
 
+
 # Survey Models
 class InitialSurveyResult(models.Model):
     HEATING_CHOICES = [
-        ('ELEC', 'Electric'),
-        ('GAS', 'Gas'),
-        ('OIL', 'Oil'),
-        ('NONE', 'None')
+        ("ELEC", "Electric"),
+        ("GAS", "Gas"),
+        ("OIL", "Oil"),
+        ("NONE", "None"),
     ]
     USAGE_FREQ_CHOICES = [
-        ('DAILY', 'Daily'),
-        ('WEEKLY', 'Weekly'),
-        ('OCCAS', 'Occasionally'),
-        ('NEVER', 'Never')
+        ("DAILY", "Daily"),
+        ("WEEKLY", "Weekly"),
+        ("OCCAS", "Occasionally"),
+        ("NEVER", "Never"),
     ]
     LIGHT_TYPE_CHOICES = [
-        ('LED', 'LED'),
-        ('CFL', 'CFL'),
-        ('INC', 'Incandescent'),
-        ('MIX', 'Mixed')
+        ("LED", "LED"),
+        ("CFL", "CFL"),
+        ("INC", "Incandescent"),
+        ("MIX", "Mixed"),
     ]
-    YES_NO_CHOICES = [
-        ('YES', 'Yes'),
-        ('NO', 'No')
-    ]
+    YES_NO_CHOICES = [("YES", "Yes"), ("NO", "No")]
     CAR_TYPE_CHOICES = [
-        ('NONE', 'None'),
-        ('PETROL', 'Petrol'),
-        ('DIESEL', 'Diesel'),
-        ('HYBRID', 'Hybrid'),
-        ('ELEC', 'Electric')
+        ("NONE", "None"),
+        ("PETROL", "Petrol"),
+        ("DIESEL", "Diesel"),
+        ("HYBRID", "Hybrid"),
+        ("ELEC", "Electric"),
     ]
     DEVICE_TIME_CHOICES = [
-        ('LT2', '<2h'),
-        ('2-4', '2-4h'),
-        ('4-8', '4-8h'),
-        ('GT8', '8+h')
+        ("LT2", "<2h"),
+        ("2-4", "2-4h"),
+        ("4-8", "4-8h"),
+        ("GT8", "8+h"),
     ]
     RENEWABLE_PCT_CHOICES = [
-        (0, '0%'),
-        (25, '25%'),
-        (50, '50%'),
-        (75, '75%'),
-        (100, '100%')
+        (0, "0%"),
+        (25, "25%"),
+        (50, "50%"),
+        (75, "75%"),
+        (100, "100%"),
     ]
     FLIGHT_CHOICES = [
-        ('NONE', 'None'),
-        ('1SHORT', '1 short'),
-        ('2-4SHORT', '2-4 short'),
-        ('1LONG', '1 long'),
-        ('MULTLONG', 'Multiple long')
+        ("NONE", "None"),
+        ("1SHORT", "1 short"),
+        ("2-4SHORT", "2-4 short"),
+        ("1LONG", "1 long"),
+        ("MULTLONG", "Multiple long"),
     ]
     TRANSPORT_FREQ_CHOICES = [
-        ('NEVER', 'Never'),
-        ('OCCAS', 'Occasionally'),
-        ('WEEKLY', 'Weekly'),
-        ('DAILY', 'Daily')
+        ("NEVER", "Never"),
+        ("OCCAS", "Occasionally"),
+        ("WEEKLY", "Weekly"),
+        ("DAILY", "Daily"),
     ]
     CLOTHES_DRY_CHOICES = [
-        ('LINE', 'Always line'),
-        ('MIXED', 'Sometimes'),
-        ('DRYER', 'Always dryer')
+        ("LINE", "Always line"),
+        ("MIXED", "Sometimes"),
+        ("DRYER", "Always dryer"),
     ]
     SECONDHAND_CHOICES = [
-        ('OFTEN', 'Often'),
-        ('SOME', 'Sometimes'),
-        ('RARELY', 'Rarely'),
-        ('NEVER', 'Never')
+        ("OFTEN", "Often"),
+        ("SOME", "Sometimes"),
+        ("RARELY", "Rarely"),
+        ("NEVER", "Never"),
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -114,69 +117,70 @@ class InitialSurveyResult(models.Model):
     def __str__(self):
         return f"{self.user.username}'s Initial Survey - {self.date_submitted.strftime('%Y-%m-%d')}"
 
+
 class WeeklyCheckupResult(models.Model):
     HEATING_CHOICES = [
-        ('OFF', 'Didn\'t need it this week'),
-        ('ECO', 'Used eco settings/timer'),
-        ('SOME', 'A few hours when needed'),
-        ('MOST', 'Most of the day')
+        ("OFF", "Didn't need it this week"),
+        ("ECO", "Used eco settings/timer"),
+        ("SOME", "A few hours when needed"),
+        ("MOST", "Most of the day"),
     ]
-    
+
     APPLIANCE_USAGE_CHOICES = [
-        ('OPT', 'Full loads, eco settings'),
-        ('REG', 'Regular loads'),
-        ('FREQ', 'Frequent small loads'),
-        ('HEAVY', 'Multiple loads daily')
+        ("OPT", "Full loads, eco settings"),
+        ("REG", "Regular loads"),
+        ("FREQ", "Frequent small loads"),
+        ("HEAVY", "Multiple loads daily"),
     ]
-    
+
     TRANSPORT_CHOICES = [
-        ('ACTIVE', 'Mostly walk/cycle'),
-        ('PUBLIC', 'Mainly public transport'),
-        ('MIXED', 'Mix of car and alternatives'),
-        ('CAR', 'Primarily car')
+        ("ACTIVE", "Mostly walk/cycle"),
+        ("PUBLIC", "Mainly public transport"),
+        ("MIXED", "Mix of car and alternatives"),
+        ("CAR", "Primarily car"),
     ]
-    
+
     DISTANCE_CHOICES = [
-        ('LOCAL', 'Stayed local (<20km)'),
-        ('REGION', 'Regional trips (20-100km)'),
-        ('LONG', 'Long distance (>100km)'),
-        ('FLIGHT', 'Took a flight')
+        ("LOCAL", "Stayed local (<20km)"),
+        ("REGION", "Regional trips (20-100km)"),
+        ("LONG", "Long distance (>100km)"),
+        ("FLIGHT", "Took a flight"),
     ]
-    
+
     CAR_TYPE_CHOICES = [
-        ('NONE', 'No car used'),
-        ('ELECTRIC', 'Electric vehicle'),
-        ('HYBRID', 'Hybrid/Small efficient car'),
-        ('STANDARD', 'Standard car'),
-        ('LARGE', 'Large vehicle/SUV')
+        ("NONE", "No car used"),
+        ("ELECTRIC", "Electric vehicle"),
+        ("HYBRID", "Hybrid/Small efficient car"),
+        ("STANDARD", "Standard car"),
+        ("LARGE", "Large vehicle/SUV"),
     ]
-    
+
     ENERGY_SOURCE_CHOICES = [
-        ('FULL_GREEN', '100% renewable/solar'),
-        ('PARTIAL', 'Partial renewable mix'),
-        ('GREEN_OPT', 'Green energy plan'),
-        ('STANDARD', 'Standard grid power')
+        ("FULL_GREEN", "100% renewable/solar"),
+        ("PARTIAL", "Partial renewable mix"),
+        ("GREEN_OPT", "Green energy plan"),
+        ("STANDARD", "Standard grid power"),
     ]
-    
+
     WATER_USAGE_CHOICES = [
-        ('MINIMAL', 'Quick showers, minimal usage'),
-        ('MODERATE', 'Moderate usage, some conservation'),
-        ('TYPICAL', 'Typical household usage'),
-        ('HIGH', 'Extended usage, multiple daily')
+        ("MINIMAL", "Quick showers, minimal usage"),
+        ("MODERATE", "Moderate usage, some conservation"),
+        ("TYPICAL", "Typical household usage"),
+        ("HIGH", "Extended usage, multiple daily"),
     ]
-    
+
     WASTE_CHOICES = [
-        ('MINIMAL', 'Minimal waste, mostly reusable'),
-        ('LOW', 'Small bag, mostly recycled'),
-        ('MEDIUM', 'Regular bin amount'),
-        ('HIGH', 'Multiple bags/overflow')
+        ("MINIMAL", "Minimal waste, mostly reusable"),
+        ("LOW", "Small bag, mostly recycled"),
+        ("MEDIUM", "Regular bin amount"),
+        ("HIGH", "Multiple bags/overflow"),
     ]
-    
+
     CONSUMPTION_CHOICES = [
-        ('NONE', 'No new purchases'),
-        ('ESSENTIAL', 'Only essentials'),
-        ('MODERATE', 'Some non-essential items'),
-        ('HIGH', 'Multiple large purchases')
+        ("NONE", "No new purchases"),
+        ("ESSENTIAL", "Only essentials"),
+        ("MODERATE", "Some non-essential items"),
+        ("HIGH", "Multiple large purchases"),
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -204,9 +208,9 @@ class WeeklyCheckupResult(models.Model):
 
 
 class Product(models.Model):
-    id    = models.AutoField(primary_key=True)
-    name  = models.CharField(max_length = 100) 
-    info  = models.CharField(max_length = 100, default = '')
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100)
+    info = models.CharField(max_length=100, default="")
     price = models.IntegerField(blank=True, null=True)
 
     def __str__(self):

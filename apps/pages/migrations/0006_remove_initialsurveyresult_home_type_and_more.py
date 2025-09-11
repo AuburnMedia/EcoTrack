@@ -4,18 +4,17 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pages', '0005_alter_userprofile_house_type_and_more'),
+        ("pages", "0005_alter_userprofile_house_type_and_more"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='initialsurveyresult',
-            name='home_type',
+            model_name="initialsurveyresult",
+            name="home_type",
         ),
         migrations.RemoveField(
-            model_name='initialsurveyresult',
-            name='household_size',
+            model_name="initialsurveyresult",
+            name="household_size",
         ),
     ]

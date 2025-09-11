@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("pages", "0007_remove_weeklycheckupresult_appliance_usage_and_more"),
     ]
