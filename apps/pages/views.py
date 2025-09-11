@@ -192,6 +192,14 @@ def index(request):
 
 @login_required
 def survey_dashboard(request):
+    # Check if user needs to complete onboarding
+    try:
+        profile = UserProfile.objects.get(user=request.user)
+        if not profile.onboarding_completed:
+            return redirect('onboarding')
+    except UserProfile.DoesNotExist:
+        return redirect('onboarding')
+
     initial_survey = InitialSurveyResult.objects.filter(user=request.user).order_by('-date_submitted').first()
     weekly_checkups = WeeklyCheckupResult.objects.filter(user=request.user).order_by('-date_submitted')[:12]
 
@@ -269,6 +277,14 @@ def initial_survey(request):
 
 @login_required
 def weekly_checkup(request):
+    # Check if user needs to complete onboarding
+    try:
+        profile = UserProfile.objects.get(user=request.user)
+        if not profile.onboarding_completed:
+            return redirect('onboarding')
+    except UserProfile.DoesNotExist:
+        return redirect('onboarding')
+
     last_checkup = WeeklyCheckupResult.objects.filter(
         user=request.user
     ).order_by('-date_submitted').first()
