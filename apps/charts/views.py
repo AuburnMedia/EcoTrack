@@ -188,10 +188,8 @@ def get_monthly_trend(user=None):
                     else:
                         your_usage.append(0)
 
-                # Generate average usage (sample data for comparison)
-                average_usage = [
-                    round(usage * 1.2, 1) for usage in your_usage
-                ]  # 20% higher than user
+                
+                average_usage = [850.0] * len(months)
 
                 return {
                     "months": months,
@@ -204,6 +202,6 @@ def get_monthly_trend(user=None):
     # Fallback to sample data
     months = ["Jun", "Jul", "Aug", "Sep", "Oct", "Nov"]
     your_usage = [1150, 1230, 980, 1420, 1100, 1050]
-    average_usage = [1200, 1180, 1220, 1350, 1280, 1150]
+    average_usage = [1000.0] * len(months)  # Flat 1000kg line
 
     return {"months": months, "your_usage": your_usage, "average_usage": average_usage}
