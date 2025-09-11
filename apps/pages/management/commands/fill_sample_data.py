@@ -137,6 +137,8 @@ class Command(BaseCommand):
             'weekly_consumption': ['NONE', 'ESSENTIAL', 'MODERATE', 'HIGH']
         }
 
+        from tqdm import tqdm
+
         # Generate 30 weeks of data
         current_date = timezone.now()
         current_date = current_date - timezone.timedelta(days=current_date.weekday() + 1)
@@ -146,7 +148,15 @@ class Command(BaseCommand):
         weeks_created = 0
         last_week_total = None
 
-        for week in range(30):
+        # Create progress bar
+        progress = tqdm(
+            range(30),
+            desc="Generating weekly data",
+            unit="week",
+            bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} weeks [{elapsed}<{remaining}]"
+        )
+
+        for week in progress:
             date = current_date - timezone.timedelta(weeks=week)
             
             # Create checkup data with a tendency towards moderate choices
@@ -221,9 +231,11 @@ class Command(BaseCommand):
             last_week_total = results['weekly_total']
             weeks_created += 1
 
-            if week % 4 == 0:  # Progress indicator every 4 weeks
-                self.stdout.write(f'Created data for week {weeks_created}...')
+            # Update progress bar description with current stats
+            progress.set_description(f"Week {weeks_created}: CO2 {results['weekly_total']:.1f}kg")
 
+        # Clear progress bar and show final message
+        progress.close()
         self.stdout.write(
             self.style.SUCCESS(
                 f'Successfully created {weeks_created} weeks of checkup data for user {username}'
