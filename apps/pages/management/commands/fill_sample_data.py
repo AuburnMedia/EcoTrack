@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from django.utils import timezone
-from apps.pages.models import WeeklyCheckupResult
+from apps.pages.models import WeeklyCheckupResult, UserProfile
 from apps.pages.carbon_calculator import CarbonCalculator
 import random
 
@@ -20,6 +20,28 @@ class Command(BaseCommand):
         except User.DoesNotExist:
             self.stdout.write(self.style.ERROR(f'User {username} does not exist'))
             return
+
+        # Create or update user profile with onboarding data
+        profile, created = UserProfile.objects.get_or_create(
+            user=user,
+            defaults={
+                'display_name': username,
+                'house_type': 'SMALL',  
+                'carbon_goal': 2000,    
+                'household_size': 1,     
+                'onboarding_completed': True
+            }
+        )
+        
+        if not created:
+            # Update existing profile
+            profile.name = username
+            profile.house_type = 'SMALL'
+            profile.carbon_goal = 2000
+            profile.onboarding_completed = True
+            profile.save()
+
+        self.stdout.write(self.style.SUCCESS(f'Updated onboarding data for user {username}'))
 
         # Choices for each field based on the model's choices
         CHOICES = {
