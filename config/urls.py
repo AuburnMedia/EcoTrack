@@ -19,7 +19,6 @@ from django.urls import include, path
 from admin_adminlte import views
 from django.contrib.auth import views as auth_views
 from apps.pages import views as pages_views
-from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path("", include("apps.pages.urls")),
