@@ -6,23 +6,51 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('pages', '0002_weeklycheckupresult_initialsurveyresult'),
+        ("pages", "0002_weeklycheckupresult_initialsurveyresult"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='UserProfile',
+            name="UserProfile",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('display_name', models.CharField(blank=True, max_length=100)),
-                ('household_size', models.PositiveIntegerField(default=1)),
-                ('house_type', models.CharField(choices=[('LARGE', 'Large house'), ('SMALL', 'Small house'), ('APT', 'Apartment')], max_length=10)),
-                ('carbon_goal', models.PositiveIntegerField(help_text='Monthly carbon goal in kilograms of CO2')),
-                ('onboarding_completed', models.BooleanField(default=False)),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("display_name", models.CharField(blank=True, max_length=100)),
+                ("household_size", models.PositiveIntegerField(default=1)),
+                (
+                    "house_type",
+                    models.CharField(
+                        choices=[
+                            ("LARGE", "Large house"),
+                            ("SMALL", "Small house"),
+                            ("APT", "Apartment"),
+                        ],
+                        max_length=10,
+                    ),
+                ),
+                (
+                    "carbon_goal",
+                    models.PositiveIntegerField(
+                        help_text="Monthly carbon goal in kilograms of CO2"
+                    ),
+                ),
+                ("onboarding_completed", models.BooleanField(default=False)),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]

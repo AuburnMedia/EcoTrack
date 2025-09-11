@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("pages", "0006_remove_initialsurveyresult_home_type_and_more"),
     ]
