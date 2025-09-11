@@ -4,25 +4,37 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pages', '0003_userprofile'),
+        ("pages", "0003_userprofile"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='userprofile',
-            name='carbon_goal',
-            field=models.PositiveIntegerField(blank=True, help_text='Monthly carbon goal in kilograms of CO2', null=True),
+            model_name="userprofile",
+            name="carbon_goal",
+            field=models.PositiveIntegerField(
+                blank=True,
+                help_text="Monthly carbon goal in kilograms of CO2",
+                null=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='userprofile',
-            name='house_type',
-            field=models.CharField(blank=True, choices=[('LARGE', 'Large house'), ('SMALL', 'Small house'), ('APT', 'Apartment')], max_length=10, null=True),
+            model_name="userprofile",
+            name="house_type",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("LARGE", "Large house"),
+                    ("SMALL", "Small house"),
+                    ("APT", "Apartment"),
+                ],
+                max_length=10,
+                null=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='userprofile',
-            name='household_size',
+            model_name="userprofile",
+            name="household_size",
             field=models.PositiveIntegerField(blank=True, null=True),
         ),
     ]
