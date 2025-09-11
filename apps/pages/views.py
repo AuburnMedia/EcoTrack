@@ -8,6 +8,7 @@ from .forms import InitialSurveyForm, WeeklyCheckupForm, UserOnboardingForm
 from .models import InitialSurveyResult, WeeklyCheckupResult, UserProfile
 from apps.charts.models import CarbonGoal
 from django.urls import reverse
+from .decorators import onboarding_required
 
 def register(request):
     if request.method == 'POST':
@@ -62,14 +63,8 @@ def onboarding(request):
     return render(request, 'pages/onboarding.html', {'form': form})
 
 @login_required
+@onboarding_required
 def index(request):
-    # Check if user needs to complete onboarding
-    try:
-        profile = UserProfile.objects.get(user=request.user)
-        if not profile.onboarding_completed:
-            return redirect('onboarding')
-    except UserProfile.DoesNotExist:
-        return redirect('onboarding')
     
     # Check if user needs to complete initial survey
     if not InitialSurveyResult.objects.filter(user=request.user).exists():
@@ -191,7 +186,9 @@ def index(request):
     return render(request, 'pages/index.html', context)
 
 @login_required
+@onboarding_required
 def survey_dashboard(request):
+
     initial_survey = InitialSurveyResult.objects.filter(user=request.user).order_by('-date_submitted').first()
     weekly_checkups = WeeklyCheckupResult.objects.filter(user=request.user).order_by('-date_submitted')[:12]
 
@@ -268,7 +265,9 @@ def initial_survey(request):
     return render(request, 'pages/initial_survey.html', {'form': form})
 
 @login_required
+@onboarding_required
 def weekly_checkup(request):
+
     last_checkup = WeeklyCheckupResult.objects.filter(
         user=request.user
     ).order_by('-date_submitted').first()
