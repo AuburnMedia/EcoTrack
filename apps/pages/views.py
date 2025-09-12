@@ -180,17 +180,23 @@ def index(request):
                     {"month": label, "average": float(checkup.weekly_total)}
                 )
 
-        # Calculate goal progress based on current goal if it exists, otherwise use baseline
+        # Calculate goal progress based on current goal and baseline
         current = float(latest_checkup.monthly_estimate) if latest_checkup else 0
         goal_progress = 0
 
-        if current_goal and current_goal.target_amount > 0:
-            # Calculate progress towards current month's goal, capped at 100%
-            # For goals, lower values are better so invert the percentage
-            progress = (1 - (current / current_goal.target_amount)) * 100
-            goal_progress = max(0, min(100, progress))  # Clamp between 0 and 100
+        if current_goal and current_goal.target_amount > 0 and current >= 0 and initial_survey:
+            baseline = float(initial_survey.monthly_total)
+            target = float(current_goal.target_amount)
+            
+            # Ensure we're not dividing by zero
+            if baseline == target:
+                goal_progress = 100 if current <= target else 0
+            else:
+                # Calculate progress using the formula: ((baseline - current) / (baseline - target)) * 100
+                progress = ((baseline - current) / (baseline - target)) * 100
+                goal_progress = max(0, min(100, progress))  # Clamp between 0 and 100
         elif initial_survey and current > 0:
-            # Fall back to baseline comparison if no goal is set
+            # Fall back to simple baseline comparison if no goal is set
             baseline = float(initial_survey.monthly_total)
             reduction = baseline - current
             # Only show positive progress (reductions), clamp at 0 for increases

@@ -47,10 +47,20 @@ class CarbonGoal(models.Model):
 
     @property
     def progress_percentage(self):
-        if self.target_amount > 0:
-            # Calculate progress as a reduction percentage
-            # Lower values are better, so invert the percentage
-            progress = (1 - (self.current_amount / self.target_amount)) * 100
+        # Get the user's initial survey for baseline
+        from apps.pages.models import InitialSurveyResult
+        baseline_survey = InitialSurveyResult.objects.filter(user=self.user).first()
+        
+        if baseline_survey and self.target_amount > 0 and self.current_amount >= 0:
+            baseline = float(baseline_survey.monthly_total)
+            
+            # Ensure we're not dividing by zero
+            if baseline == self.target_amount:
+                return 100 if self.current_amount <= self.target_amount else 0
+                
+            # Calculate progress using the formula: ((baseline - current) / (baseline - target)) * 100
+            progress = ((baseline - self.current_amount) / (baseline - self.target_amount)) * 100
+            
             # Clamp between 0 and 100
             return max(0, min(100, progress))
         return 0
