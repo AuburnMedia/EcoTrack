@@ -191,8 +191,6 @@ def exec_process(aCmd):
 
 def exec_subprocess(full_cmd):
     retcode = COMMON.OK
-    stdout = ""
-    stderr = ""
 
     try:
         # create project in src

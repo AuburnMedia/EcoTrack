@@ -42,12 +42,12 @@ def model_suggest_charts(aModelClassImport, aDebug=False):
     aQuestion += "Here are the first lines from the file."
 
     idx = 0
-    for l in csv_content:
+    for line in csv_content:
         idx += 1
         if idx > 5:
             break
 
-        aQuestion += l + "\n"
+        aQuestion += line + "\n"
 
     aQuestion += "\nBased on the above information and field data, please suggest all relevant charts and context information in JSON format with folowing sections:"
     aQuestion += "\nNode Summary: with a title about the data provided in the CSV and a description with full input."
@@ -99,7 +99,7 @@ def model_suggest_charts(aModelClassImport, aDebug=False):
 
         retVal = COMMON.OK
 
-    except json.JSONDecodeError:
+    except json.JSONDecodeError as e:
         print(f"> ERR: {str(e)}")
         retVal = COMMON.ERR
     except Exception as e:
@@ -135,12 +135,12 @@ def csv_suggest_charts(aCvsFile, aDebug=False):
     aQuestion += "Here are the first lines from the file."
 
     idx = 0
-    for l in csv_content:
+    for line in csv_content:
         idx += 1
         if idx > 5:
             break
 
-        aQuestion += l + "\n"
+        aQuestion += line + "\n"
 
     aQuestion += "\nBased on the above information and field data, please suggest all relevant charts and context information in JSON format with folowing sections:"
     aQuestion += "\nNode Summary: with a title about the data provided in the CSV and a description with full input."
@@ -192,7 +192,7 @@ def csv_suggest_charts(aCvsFile, aDebug=False):
 
         retVal = COMMON.OK
 
-    except json.JSONDecodeError:
+    except json.JSONDecodeError as e:
         print(f"> ERR: {str(e)}")
         retVal = COMMON.ERR
     except Exception as e:
@@ -228,12 +228,12 @@ def csv_query(aCvsFile, aDataQuery, aRowLimit=10, aDebug=False):
     aQuestion += "Here is the content."
 
     idx = 0
-    for l in csv_content:
+    for line in csv_content:
         idx += 1
         if idx > aRowLimit:
             break
 
-        aQuestion += l + "\n"
+        aQuestion += line + "\n"
 
     aQuestion += "\n}"
 

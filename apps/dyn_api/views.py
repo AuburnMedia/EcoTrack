@@ -4,14 +4,13 @@ Copyright (c) 2019 - present AppSeed.us
 """
 
 from django.http import Http404
-
-from django.shortcuts import render, get_object_or_404
-
+from django.shortcuts import render
+from django.conf import settings
 from rest_framework.generics import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from django.conf import settings
+from .helpers import Utils
 
 DYNAMIC_API = {}
 
@@ -19,8 +18,6 @@ try:
     DYNAMIC_API = getattr(settings, "DYNAMIC_API")
 except AttributeError:
     pass
-
-from .helpers import Utils
 
 
 def index(request):

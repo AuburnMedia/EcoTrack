@@ -34,7 +34,7 @@ def file_exists(aPath):
         if open(aPath, "r"):
             return True
 
-    except:
+    except Exception:
         return False
 
 
@@ -160,7 +160,7 @@ def file_write(path, content, f_append=False):
         print("ERR file_write(): " + str(e))
         return False
 
-    except:
+    except Exception:
         print(" *** Err processing file " + str(path))
         return False
 
