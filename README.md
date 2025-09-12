@@ -2,7 +2,7 @@
 
 ## Overview
 
-EcoTrack is a sophisticated web-based application designed to facilitate comprehensive carbon footprint monitoring and environmental impact assessment. Utilizing Django framework and incorporating advanced data visualization capabilities, EcoTrack enables users to track, analyze, and optimize their environmental impact through various metrics and interactive features.
+EcoTrack is web-based application designed to facilitate carbon footprint monitoring and environmental impact tracking. Utilizing Django and data visualization capabilities, EcoTrack enables users to track, analyze, and optimize their environmental impact through various interactive features.
 
 ## Core Features
 
