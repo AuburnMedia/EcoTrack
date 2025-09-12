@@ -28,7 +28,7 @@ When you start using EcoTrack, you'll create an account and tell us a little bit
 First of all, clone the repo:
 
 ```
-git clone https://github.com/AuburnMedia/ecotrack-adminlte
+git clone https://github.com/AuburnMedia/EcoTrack
 ```
 Build your virtual environment (or bring your own):
 ```
