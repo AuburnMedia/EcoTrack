@@ -1,13 +1,15 @@
+import json
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
+from django.utils import timezone
 from .forms import InitialSurveyForm, WeeklyCheckupForm, UserOnboardingForm
 from .models import InitialSurveyResult, WeeklyCheckupResult, UserProfile
 from apps.charts.models import CarbonGoal
-from django.urls import reverse
 from .decorators import onboarding_required
+from .carbon_calculator import CarbonCalculator
 
 
 def register(request):
@@ -24,11 +26,6 @@ def register(request):
     else:
         form = UserCreationForm()
     return render(request, "accounts/register.html", {"form": form})
-
-
-from .carbon_calculator import CarbonCalculator
-from django.utils import timezone
-import json
 
 
 @login_required

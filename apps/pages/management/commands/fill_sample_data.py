@@ -228,7 +228,7 @@ class Command(BaseCommand):
             WeeklyCheckupResult._meta.get_field("date_submitted").auto_now_add = False
 
             # Create the weekly checkup with the specific date
-            checkup = WeeklyCheckupResult.objects.create(
+            WeeklyCheckupResult.objects.create(
                 user=user,
                 date_submitted=date,
                 heating_usage=data["heating_usage"],

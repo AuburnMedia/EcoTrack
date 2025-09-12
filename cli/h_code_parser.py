@@ -22,7 +22,7 @@ def name_to_class(name: str):
 
         # If all good, a class is returned
         return getattr(module, cls_name)
-    except:
+    except Exception:
         # Nothing found, bozzo input
         return None
 

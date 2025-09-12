@@ -198,7 +198,7 @@ def get_monthly_trend(user=None):
                     "your_usage": your_usage,
                     "average_usage": average_usage,
                 }
-        except:
+        except Exception:
             pass
 
     # Fallback to sample data
