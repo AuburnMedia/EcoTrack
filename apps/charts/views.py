@@ -186,7 +186,6 @@ def get_monthly_trend(user=None):
                     else:
                         your_usage.append(0)
 
-                
                 average_usage = [40.0] * len(months)
 
                 return {

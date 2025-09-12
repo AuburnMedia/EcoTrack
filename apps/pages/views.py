@@ -184,10 +184,15 @@ def index(request):
         current = float(latest_checkup.monthly_estimate) if latest_checkup else 0
         goal_progress = 0
 
-        if current_goal and current_goal.target_amount > 0 and current >= 0 and initial_survey:
+        if (
+            current_goal
+            and current_goal.target_amount > 0
+            and current >= 0
+            and initial_survey
+        ):
             baseline = float(initial_survey.monthly_total)
             target = float(current_goal.target_amount)
-            
+
             # Check if current usage is at or below target (achieved goal)
             if current <= target:
                 goal_progress = 100

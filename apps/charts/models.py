@@ -49,16 +49,17 @@ class CarbonGoal(models.Model):
     def progress_percentage(self):
         # Get the user's initial survey for baseline
         from apps.pages.models import InitialSurveyResult
+
         baseline_survey = InitialSurveyResult.objects.filter(user=self.user).first()
-        
+
         if baseline_survey and self.target_amount > 0 and self.current_amount >= 0:
             baseline = float(baseline_survey.monthly_total)
-            
+
             # Validate the goal
             if self.target_amount >= baseline:
                 # Invalid goal (target should be less than baseline)
                 return 0
-            
+
             # Case 1: Current usage exceeds baseline
             if self.current_amount >= baseline:
                 return 0

@@ -4,25 +4,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pages', '0009_alter_weeklycheckupresult_appliance_usage_and_more'),
+        ("pages", "0009_alter_weeklycheckupresult_appliance_usage_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='weeklycheckupresult',
-            name='home_electric_subtotal',
+            model_name="weeklycheckupresult",
+            name="home_electric_subtotal",
             field=models.FloatField(default=0.0),
         ),
         migrations.AddField(
-            model_name='weeklycheckupresult',
-            name='monthly_estimate_per_person',
+            model_name="weeklycheckupresult",
+            name="monthly_estimate_per_person",
             field=models.FloatField(default=0.0),
         ),
         migrations.AddField(
-            model_name='weeklycheckupresult',
-            name='renewable_discount',
+            model_name="weeklycheckupresult",
+            name="renewable_discount",
             field=models.FloatField(default=0.0),
         ),
     ]
