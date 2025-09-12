@@ -1,4 +1,5 @@
-# EcoTrack - Track Your Environmental Impact
+# EcoTrack
+## :leaf: Track your enviromental impact
 
 
 ![Image of the website in action](./static/img/EcoTrack_demo_1.png)
