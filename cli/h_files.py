@@ -1,7 +1,3 @@
-# -*- encoding: utf-8 -*-
-"""
-Copyright (c) AppSeed.us
-"""
 
 import os
 import fnmatch
