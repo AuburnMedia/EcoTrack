@@ -200,6 +200,6 @@ def get_monthly_trend(user=None):
     # Fallback to sample data
     months = ["Jun", "Jul", "Aug", "Sep", "Oct", "Nov"]
     your_usage = [1150, 1230, 980, 1420, 1100, 1050]
-    average_usage = [1000.0] * len(months)  # Flat 1000kg line
+    average_usage = [40.0] * len(months)  # Flat 40kg line
 
     return {"months": months, "your_usage": your_usage, "average_usage": average_usage}
