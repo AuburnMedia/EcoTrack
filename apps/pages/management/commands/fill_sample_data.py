@@ -40,7 +40,7 @@ class Command(BaseCommand):
             # Update existing profile
             profile.display_name = username
             profile.house_type = "SMALL"
-            profile.carbon_goal = 40
+            profile.carbon_goal = 170
             profile.onboarding_completed = True
             profile.save()
 
