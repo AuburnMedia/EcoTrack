@@ -1,7 +1,4 @@
-# -*- encoding: utf-8 -*-
-"""
-Copyright (c) App-Generator.dev | AppSeed.us
-"""
+
 
 import random
 import string

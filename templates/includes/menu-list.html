@@ -11,14 +11,7 @@
       </a>
     </li>
 
-    <!-- Survey Menu -->
-    {% if request.user.is_authenticated %}
-    <li class="nav-item">
-      <a href="{% url 'survey_dashboard' %}" class="nav-link {% if 'survey' in segment %} active {% endif %}">
-        <i class="nav-icon fas fa-clipboard-list"></i>
-        <p>Survey</p>
-      </a>
-    </li>
+    
     
     <!-- Detailed Information (Charts) -->
     <li class="nav-item">
@@ -27,8 +20,16 @@
         <p>Detailed Information</p>
       </a>
     </li>
+    
+    <!-- Survey Menu -->
+    {% if request.user.is_authenticated %}
+    <li class="nav-item">
+      <a href="{% url 'survey_dashboard' %}" class="nav-link {% if 'survey' in segment %} active {% endif %}">
+        <i class="nav-icon fas fa-clipboard-list"></i>
+        <p>Survey</p>
+      </a>
+    </li>
     {% endif %}
-
     <!-- Authentication -->
     {% if request.user.is_authenticated %}
     <li class="nav-item">
