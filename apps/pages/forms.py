@@ -86,6 +86,9 @@ class WeeklyCheckupForm(forms.ModelForm):
             "weekly_total",
             "pct_change_from_last",
             "monthly_estimate",
+            "home_electric_subtotal",
+            "renewable_discount",
+            "monthly_estimate_per_person",
         ]
         widgets = {
             "heating_usage": forms.Select(attrs={"class": "form-control"}),
