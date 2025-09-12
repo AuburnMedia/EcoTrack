@@ -1,15 +1,15 @@
 # EcoTrack - Track Your Environmental Impact
 
 
-![EcoTrack Image](./static/img/EcoTrack_demo_1)
+![Image of the website in action](./static/img/EcoTrack_demo_1)
 
 ## Overview
 
-EcoTrack helps you understand and reduce your impact on the environment. It's a website that shows you how your daily activities affect your carbon footprint and helps you make better choices for the planet.
+EcoTrack helps you understand and reduce your impact on the environment. It shows you how your daily life affects your carbon footprint and helps you make better choices for the planet.
 
 ## Features
 
-When you start using EcoTrack, you'll create a secure account and tell us about your lifestyle. The system will then:
+When you start using EcoTrack, you'll create an account and tell us a little bit about your lifestyle. The application will then:
 
 Track Your Impact: Answer a quick survey when you begin and short weekly check-ins to see how you're doing. We look at your home energy use, how you travel, what appliances you use, and how you handle waste.
 
