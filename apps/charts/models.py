@@ -54,13 +54,21 @@ class CarbonGoal(models.Model):
         if baseline_survey and self.target_amount > 0 and self.current_amount >= 0:
             baseline = float(baseline_survey.monthly_total)
             
-            # Ensure we're not dividing by zero
-            if baseline == self.target_amount:
-                return 100 if self.current_amount <= self.target_amount else 0
-                
-            # Calculate progress using the formula: ((baseline - current) / (baseline - target)) * 100
-            progress = ((baseline - self.current_amount) / (baseline - self.target_amount)) * 100
+            # Validate the goal
+            if self.target_amount >= baseline:
+                # Invalid goal (target should be less than baseline)
+                return 0
             
-            # Clamp between 0 and 100
-            return max(0, min(100, progress))
+            # Case 1: Current usage exceeds baseline
+            if self.current_amount >= baseline:
+                return 0
+            # Case 2: Current usage is below target (exceeded goal)
+            elif self.current_amount <= self.target_amount:
+                return 100
+            # Case 3: Current usage is between baseline and target
+            else:
+                total_reduction_needed = baseline - self.target_amount
+                reduction_achieved = baseline - self.current_amount
+                progress = min(100, (reduction_achieved / total_reduction_needed) * 100)
+                return max(0, progress)
         return 0
