@@ -15,7 +15,6 @@ from apps.pages.decorators import onboarding_required
 @login_required
 @onboarding_required
 def manage_carbon_goal(request):
-
     # Get or create current month's goal
     current_month = timezone.now().replace(day=1)
     goal, created = CarbonGoal.objects.get_or_create(
@@ -45,7 +44,6 @@ def manage_carbon_goal(request):
 @login_required
 @onboarding_required
 def index(request):
-
     # Get carbon usage data for the current user
     current_user = request.user if request.user.is_authenticated else None
 
@@ -188,22 +186,20 @@ def get_monthly_trend(user=None):
                     else:
                         your_usage.append(0)
 
-                # Generate average usage (sample data for comparison)
-                average_usage = [
-                    round(usage * 1.2, 1) for usage in your_usage
-                ]  # 20% higher than user
+                
+                average_usage = [40.0] * len(months)
 
                 return {
                     "months": months,
                     "your_usage": your_usage,
                     "average_usage": average_usage,
                 }
-        except:
+        except Exception:
             pass
 
     # Fallback to sample data
     months = ["Jun", "Jul", "Aug", "Sep", "Oct", "Nov"]
     your_usage = [1150, 1230, 980, 1420, 1100, 1050]
-    average_usage = [1200, 1180, 1220, 1350, 1280, 1150]
+    average_usage = [40.0] * len(months)  # Flat 40kg line
 
     return {"months": months, "your_usage": your_usage, "average_usage": average_usage}

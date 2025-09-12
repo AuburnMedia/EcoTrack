@@ -1,13 +1,15 @@
+import json
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
+from django.utils import timezone
 from .forms import InitialSurveyForm, WeeklyCheckupForm, UserOnboardingForm
 from .models import InitialSurveyResult, WeeklyCheckupResult, UserProfile
 from apps.charts.models import CarbonGoal
-from django.urls import reverse
 from .decorators import onboarding_required
+from .carbon_calculator import CarbonCalculator
 
 
 def register(request):
@@ -24,11 +26,6 @@ def register(request):
     else:
         form = UserCreationForm()
     return render(request, "accounts/register.html", {"form": form})
-
-
-from .carbon_calculator import CarbonCalculator
-from django.utils import timezone
-import json
 
 
 @login_required
@@ -245,8 +242,14 @@ def survey_dashboard(request):
         "-date_submitted"
     )[:12]
 
-    initial_survey = InitialSurveyResult.objects.filter(user=request.user).order_by('-date_submitted').first()
-    weekly_checkups = WeeklyCheckupResult.objects.filter(user=request.user).order_by('-date_submitted')[:12]
+    initial_survey = (
+        InitialSurveyResult.objects.filter(user=request.user)
+        .order_by("-date_submitted")
+        .first()
+    )
+    weekly_checkups = WeeklyCheckupResult.objects.filter(user=request.user).order_by(
+        "-date_submitted"
+    )[:12]
 
     # Prepare chart data with better error handling
     chart_data = {
@@ -337,10 +340,11 @@ def weekly_checkup(request):
         .order_by("-date_submitted")
         .first()
     )
-    last_checkup = WeeklyCheckupResult.objects.filter(
-        user=request.user
-    ).order_by('-date_submitted').first()
-
+    last_checkup = (
+        WeeklyCheckupResult.objects.filter(user=request.user)
+        .order_by("-date_submitted")
+        .first()
+    )
 
     if request.method == "POST":
         form = WeeklyCheckupForm(request.POST)

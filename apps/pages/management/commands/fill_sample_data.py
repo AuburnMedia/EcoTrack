@@ -222,13 +222,15 @@ class Command(BaseCommand):
             }
 
             # Calculate carbon impact using the CarbonCalculator
-            results = CarbonCalculator.calculate_weekly_checkup(data, last_week_total)
+            results = CarbonCalculator.calculate_weekly_checkup(
+                data, last_week_total, profile.household_size
+            )
 
             # Force auto_now_add to use our date by temporarily disabling it
             WeeklyCheckupResult._meta.get_field("date_submitted").auto_now_add = False
 
             # Create the weekly checkup with the specific date
-            checkup = WeeklyCheckupResult.objects.create(
+            WeeklyCheckupResult.objects.create(
                 user=user,
                 date_submitted=date,
                 heating_usage=data["heating_usage"],
@@ -241,9 +243,12 @@ class Command(BaseCommand):
                 waste_generation=data["waste_generation"],
                 weekly_consumption=data["weekly_consumption"],
                 weekly_raw_total=results["weekly_raw_total"],
+                home_electric_subtotal=results["home_electric_subtotal"],
+                renewable_discount=results["renewable_discount"],
                 weekly_total=results["weekly_total"],
                 pct_change_from_last=results["pct_change_from_last"],
                 monthly_estimate=results["monthly_estimate"],
+                monthly_estimate_per_person=results["monthly_estimate_per_person"],
             )
 
             # Re-enable auto_now_add for normal operation
