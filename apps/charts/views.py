@@ -15,7 +15,6 @@ from apps.pages.decorators import onboarding_required
 @login_required
 @onboarding_required
 def manage_carbon_goal(request):
-
     # Get or create current month's goal
     current_month = timezone.now().replace(day=1)
     goal, created = CarbonGoal.objects.get_or_create(
@@ -45,7 +44,6 @@ def manage_carbon_goal(request):
 @login_required
 @onboarding_required
 def index(request):
-
     # Get carbon usage data for the current user
     current_user = request.user if request.user.is_authenticated else None
 

@@ -1,88 +1,86 @@
 class CarbonCalculator:
-    # Monthly weights for Initial Survey
     MONTHLY_WEIGHTS = {
-        "home_type": {"APT": 100, "SMALL": 150, "LARGE": 200},
-        "primary_heating": {"ELEC": 150, "GAS": 250, "OIL": 350, "NONE": 0},
-        "appliance_use": {"DAILY": 50, "WEEKLY": 20, "OCCAS": 10, "NEVER": 0},
-        "lighting_type": {"LED": 5, "CFL": 15, "INC": 40, "MIX": 25},
-        "air_conditioning": {"YES": 80, "NO": 0},
+        "home_type": {"APT": 4, "SMALL": 6, "LARGE": 8},
+        "primary_heating": {"ELEC": 6, "GAS": 10, "OIL": 14, "NONE": 0},
+        "appliance_use": {"DAILY": 2, "WEEKLY": 0.8, "OCCAS": 0.4, "NEVER": 0},
+        "lighting_type": {"LED": 0.2, "CFL": 0.6, "INC": 1.6, "MIX": 1},
+        "air_conditioning": {"YES": 3.2, "NO": 0},
         "car_type": {
             "NONE": 0,
-            "PETROL": 300,
-            "DIESEL": 320,
-            "HYBRID": 150,
-            "ELEC": 60,
+            "PETROL": 12,
+            "DIESEL": 13,
+            "HYBRID": 6,
+            "ELEC": 2.4,
         },
-        "device_time": {"LT2": 10, "2-4": 20, "4-8": 40, "GT8": 60},
+        "device_time": {"LT2": 0.4, "2-4": 0.8, "4-8": 1.6, "GT8": 2.4},
         "flights_per_year": {
             "NONE": 0,
-            "1SHORT": 100,
-            "2-4SHORT": 200,
-            "1LONG": 600,
-            "MULTLONG": 1200,
+            "1SHORT": 4,
+            "2-4SHORT": 8,
+            "1LONG": 24,
+            "MULTLONG": 48,
         },
-        "public_transport": {"NEVER": 0, "OCCAS": -20, "WEEKLY": -50, "DAILY": -80},
-        "compost_waste": {"YES": -10, "NO": 0},
-        "clothes_drying": {"LINE": -15, "MIXED": -5, "DRYER": 0},
-        "buy_secondhand": {"OFTEN": -20, "SOME": -10, "RARELY": -5, "NEVER": 0},
+        "public_transport": {"NEVER": 0, "OCCAS": -0.8, "WEEKLY": -2, "DAILY": -3.2},
+        "compost_waste": {"YES": -0.4, "NO": 0},
+        "clothes_drying": {"LINE": -0.6, "MIXED": -0.2, "DRYER": 0},
+        "buy_secondhand": {"OFTEN": -0.8, "SOME": -0.4, "RARELY": -0.2, "NEVER": 0},
     }
 
-    # Weekly weights for Weekly Checkup (in kg CO2e)
     WEEKLY_WEIGHTS = {
         "heating_usage": {
-            "OFF": 0,  # No heating/cooling needed
-            "ECO": 15,  # Minimal usage with eco settings
-            "SOME": 30,  # Moderate usage
-            "MOST": 60,  # Heavy usage
+            "OFF": 0,
+            "ECO": 0.6,
+            "SOME": 1.2,
+            "MOST": 2.4,
         },
         "appliance_usage": {
-            "OPT": 10,  # Optimized usage
-            "REG": 20,  # Regular usage
-            "FREQ": 35,  # Frequent usage
-            "HEAVY": 50,  # Heavy usage
+            "OPT": 0.4,
+            "REG": 0.8,
+            "FREQ": 1.4,
+            "HEAVY": 2.0,
         },
         "daily_transport": {
-            "ACTIVE": 0,  # Walking/cycling
-            "PUBLIC": 15,  # Public transport
-            "MIXED": 30,  # Mix of methods
-            "CAR": 50,  # Car-dependent
+            "ACTIVE": 0,
+            "PUBLIC": 0.6,
+            "MIXED": 1.2,
+            "CAR": 2.0,
         },
         "weekly_travel": {
-            "LOCAL": 10,  # Local only
-            "REGION": 30,  # Regional trips
-            "LONG": 80,  # Long distance
-            "FLIGHT": 200,  # Air travel
+            "LOCAL": 0.4,
+            "REGION": 1.2,
+            "LONG": 3.2,
+            "FLIGHT": 8.0,
         },
         "vehicle_type": {
-            "NONE": 0,  # No car used
-            "ELECTRIC": 5,  # Electric vehicle
-            "HYBRID": 15,  # Hybrid/efficient
-            "STANDARD": 30,  # Standard car
-            "LARGE": 45,  # Large vehicle
+            "NONE": 0,
+            "ELECTRIC": 0.2,
+            "HYBRID": 0.6,
+            "STANDARD": 1.2,
+            "LARGE": 1.8,
         },
         "energy_source": {
-            "FULL_GREEN": 5,  # 100% renewable
-            "PARTIAL": 15,  # Partial renewable
-            "GREEN_OPT": 25,  # Green energy plan
-            "STANDARD": 40,  # Standard grid
+            "FULL_GREEN": 0.2,
+            "PARTIAL": 0.6,
+            "GREEN_OPT": 1.0,
+            "STANDARD": 1.6,
         },
         "water_usage": {
-            "MINIMAL": 10,  # Very efficient
-            "MODERATE": 20,  # Some conservation
-            "TYPICAL": 35,  # Average usage
-            "HIGH": 50,  # High usage
+            "MINIMAL": 0.4,
+            "MODERATE": 0.8,
+            "TYPICAL": 1.4,
+            "HIGH": 2.0,
         },
         "waste_generation": {
-            "MINIMAL": 5,  # Minimal waste
-            "LOW": 15,  # Low waste
-            "MEDIUM": 30,  # Average waste
-            "HIGH": 50,  # High waste
+            "MINIMAL": 0.2,
+            "LOW": 0.6,
+            "MEDIUM": 1.2,
+            "HIGH": 2.0,
         },
         "weekly_consumption": {
-            "NONE": 0,  # No purchases
-            "ESSENTIAL": 10,  # Essential only
-            "MODERATE": 25,  # Some non-essential
-            "HIGH": 45,  # High consumption
+            "NONE": 0,
+            "ESSENTIAL": 0.4,
+            "MODERATE": 1.0,
+            "HIGH": 1.8,
         },
     }
 
@@ -148,7 +146,7 @@ class CarbonCalculator:
         }
 
     @staticmethod
-    def calculate_weekly_checkup(data, last_week_total=None):
+    def calculate_weekly_checkup(data, last_week_total=None, household_size=1):
         """Calculate carbon emissions (in kg CO2e) from weekly checkup data."""
         # Calculate base emissions from each category
         weekly_raw_total = (
@@ -199,9 +197,31 @@ class CarbonCalculator:
 
         monthly_estimate = weekly_total * 4
 
+        home_electric_subtotal = (
+            CarbonCalculator.WEEKLY_WEIGHTS["heating_usage"][data["heating_usage"]]
+            + CarbonCalculator.WEEKLY_WEIGHTS["appliance_usage"][
+                data["appliance_usage"]
+            ]
+            + CarbonCalculator.WEEKLY_WEIGHTS["energy_source"][data["energy_source"]]
+            + CarbonCalculator.WEEKLY_WEIGHTS["water_usage"][data["water_usage"]]
+        )
+
+        renewable_discount = 0
+        if data["energy_source"] == "FULL_GREEN":
+            renewable_discount = home_electric_subtotal * 0.8  # 80% discount
+        elif data["energy_source"] == "PARTIAL":
+            renewable_discount = home_electric_subtotal * 0.4  # 40% discount
+        elif data["energy_source"] == "GREEN_OPT":
+            renewable_discount = home_electric_subtotal * 0.2  # 20% discount
+
+        monthly_estimate_per_person = monthly_estimate / household_size
+
         return {
             "weekly_raw_total": weekly_raw_total,
+            "home_electric_subtotal": home_electric_subtotal,
+            "renewable_discount": renewable_discount,
             "weekly_total": weekly_total,
             "pct_change_from_last": pct_change,
             "monthly_estimate": monthly_estimate,
+            "monthly_estimate_per_person": monthly_estimate_per_person,
         }
