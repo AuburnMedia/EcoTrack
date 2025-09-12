@@ -188,23 +188,18 @@ def index(request):
             baseline = float(initial_survey.monthly_total)
             target = float(current_goal.target_amount)
             
-            # Validate the goal
-            if target >= baseline:
-                # Invalid goal (target should be less than baseline)
+            # Check if current usage is at or below target (achieved goal)
+            if current <= target:
+                goal_progress = 100
+            # Check if current usage exceeds baseline (no progress)
+            elif current >= baseline:
                 goal_progress = 0
+            # Calculate progress for values between baseline and target
             else:
-                # Case 1: Current usage exceeds baseline
-                if current >= baseline:
-                    goal_progress = 0
-                # Case 2: Current usage is below target (exceeded goal)
-                elif current <= target:
-                    goal_progress = 100
-                # Case 3: Current usage is between baseline and target
-                else:
-                    total_reduction_needed = baseline - target
-                    reduction_achieved = baseline - current
-                    goal_progress = min(100, (reduction_achieved / total_reduction_needed) * 100)
-                    goal_progress = max(0, goal_progress)
+                total_reduction_needed = baseline - target
+                reduction_achieved = baseline - current
+                goal_progress = (reduction_achieved / total_reduction_needed) * 100
+                goal_progress = max(0, min(100, goal_progress))
         elif initial_survey and current > 0:
             # Fall back to simple baseline comparison if no goal is set
             baseline = float(initial_survey.monthly_total)
