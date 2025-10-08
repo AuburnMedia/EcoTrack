@@ -12,13 +12,14 @@
   <!-- Sidebar -->
   <div class="sidebar">
     <!-- Sidebar user panel (optional) -->
-    <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+  <div class="user-panel mt-3 pb-3 mb-3 d-flex align-items-center">
       <div class="image">
         <img src="{% static 'dist/img/user2-160x160.jpg' %}" class="img-circle elevation-2" alt="User Image">
       </div>
       <div class="info">
         {% if request.user.is_authenticated %}
-          <a href="#" class="d-block">{{request.user.username}}</a>
+          <a href="#" class="d-block">{{ user_display_name|default:request.user.get_full_name|default:request.user.username }}</a>
+          <span class="d-block text-muted small">@{{ request.user.username }}</span>
         {% else %}
           <a href="#" class="d-block">Alexander Pierce</a>
         {% endif %}        

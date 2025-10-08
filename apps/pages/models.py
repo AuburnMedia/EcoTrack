@@ -10,7 +10,7 @@ class UserProfile(models.Model):
     ]
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    display_name = models.CharField(max_length=100, blank=True)
+    display_name = models.CharField(max_length=100, blank=False)
     household_size = models.PositiveIntegerField(default=1)  # Default to 1 person
     house_type = models.CharField(
         max_length=10, choices=HOUSE_TYPE_CHOICES, default="APT"
