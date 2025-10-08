@@ -105,13 +105,11 @@ def env_comment(aEnvVar):
     if not env:
         return
 
-    found = False
 
     env_p = []
     for line in env:
         # module laready there, update version
         if line.startswith(aEnvVar + "="):
-            found = True
             line = "#" + line
 
         env_p.append(line)
@@ -130,13 +128,11 @@ def env_uncomment(aEnvVar):
     if not env:
         return
 
-    found = False
 
     env_p = []
     for line in env:
         # module laready there, update version
         if line.startswith("#" + aEnvVar + "="):
-            found = True
             line = line[1:]
 
         env_p.append(line)

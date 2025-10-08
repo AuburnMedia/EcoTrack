@@ -58,7 +58,7 @@ def cfg_format(FILE_PATH):
             return COMMON.ERR
 
         # Apply 'Black' formatter over the file
-        result = exec_process("black " + FILE_PATH)
+        exec_process("black " + FILE_PATH)
 
         # if COMMON.OK != result:
         #    print('Err formating settings')

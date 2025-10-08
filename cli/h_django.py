@@ -1,4 +1,3 @@
-
 import time
 import django
 from django.contrib.auth import get_user_model
@@ -26,7 +25,7 @@ def get_django():
 
 
 def check_db_conn():
-    apps = get_django()
+    get_django()
 
     from django.db import connection
     from django.db.utils import OperationalError
