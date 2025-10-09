@@ -5,7 +5,12 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
 from django.utils import timezone
-from .forms import InitialSurveyForm, WeeklyCheckupForm, UserOnboardingForm
+from .forms import (
+    InitialSurveyForm,
+    WeeklyCheckupForm,
+    UserOnboardingForm,
+    UserProfileForm,
+)
 from .models import InitialSurveyResult, WeeklyCheckupResult, UserProfile
 from apps.charts.models import CarbonGoal
 from .decorators import onboarding_required
@@ -53,10 +58,10 @@ def onboarding(request):
                 target_amount=profile.carbon_goal,
             )
 
-            messages.success(
-                request,
-                "Welcome to EcoTrack! Now, let's gather some information about your carbon footprint.",
-            )
+            #messages.success(
+            #    request,
+            #    "Welcome to EcoTrack! Now, let's gather some information about your carbon footprint.",
+            #)
             return redirect("initial_survey")
     else:
         form = UserOnboardingForm(instance=profile)
@@ -77,10 +82,10 @@ def index(request):
 
     # Check if user needs to complete initial survey
     if not InitialSurveyResult.objects.filter(user=request.user).exists():
-        messages.info(
-            request,
-            "Please complete the initial survey to start tracking your carbon footprint.",
-        )
+        #messages.info(
+        #    request,
+        #    "Please complete the initial survey to start tracking your carbon footprint.",
+        #)
         return redirect("initial_survey")
 
     context = {}
@@ -250,6 +255,95 @@ def index(request):
 
 @login_required
 @onboarding_required
+def profile(request):
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+
+    current_month = timezone.now().replace(day=1)
+    current_goal = CarbonGoal.objects.filter(
+        user=request.user, month=current_month
+    ).first()
+
+    initial_survey = (
+        InitialSurveyResult.objects.filter(user=request.user)
+        .order_by("-date_submitted")
+        .first()
+    )
+    last_checkup = (
+        WeeklyCheckupResult.objects.filter(user=request.user)
+        .order_by("-date_submitted")
+        .first()
+    )
+
+    if request.method == "POST":
+        form = UserProfileForm(request.POST, instance=profile)
+        if form.is_valid():
+            profile = form.save()
+
+            goal_value = profile.carbon_goal or 0
+            carbon_goal, created_goal = CarbonGoal.objects.get_or_create(
+                user=request.user,
+                month=current_month,
+                defaults={"target_amount": goal_value, "current_amount": 0},
+            )
+            if not created_goal and carbon_goal.target_amount != goal_value:
+                carbon_goal.target_amount = goal_value
+                carbon_goal.save(update_fields=["target_amount"])
+            current_goal = carbon_goal
+
+            #messages.success(request, "Profile updated successfully.")
+            return redirect("profile")
+    else:
+        form = UserProfileForm(instance=profile)
+
+    time_since_last_checkup = (
+        (timezone.now() - last_checkup.date_submitted).days if last_checkup else None
+    )
+
+    goal_progress = None
+    if current_goal and last_checkup:
+        current_estimate = float(last_checkup.monthly_estimate or 0)
+        target_amount = float(current_goal.target_amount or 0)
+        if target_amount > 0:
+            if current_estimate <= target_amount:
+                goal_progress = 100.0
+            elif initial_survey:
+                baseline = float(initial_survey.monthly_total or 0)
+                if baseline > target_amount:
+                    if current_estimate >= baseline:
+                        goal_progress = 0.0
+                    else:
+                        total_reduction_needed = baseline - target_amount
+                        reduction_achieved = baseline - current_estimate
+                        if total_reduction_needed > 0:
+                            goal_progress = max(
+                                0.0,
+                                min(
+                                    100.0,
+                                    (reduction_achieved / total_reduction_needed) * 100,
+                                ),
+                            )
+            else:
+                # Without baseline data, show relative progress towards target
+                if current_estimate > 0:
+                    ratio = target_amount / current_estimate
+                    goal_progress = max(0.0, min(100.0, ratio * 100))
+
+    context = {
+        "form": form,
+        "profile": profile,
+        "current_goal": current_goal,
+        "initial_survey": initial_survey,
+        "last_checkup": last_checkup,
+        "time_since_last_checkup": time_since_last_checkup,
+        "goal_progress": goal_progress,
+        "segment": "profile",
+    }
+
+    return render(request, "pages/profile.html", context)
+
+
+@login_required
+@onboarding_required
 def survey_dashboard(request):
     initial_survey = (
         InitialSurveyResult.objects.filter(user=request.user)
@@ -305,14 +399,14 @@ def initial_survey(request):
     try:
         profile = UserProfile.objects.get(user=request.user)
         if not profile.onboarding_completed:
-            messages.error(request, "Please complete the onboarding process first.")
+            #messages.error(request, "Please complete the onboarding process first.")
             return redirect("onboarding")
     except UserProfile.DoesNotExist:
         return redirect("onboarding")
 
     # Check if user already has an initial survey
     if InitialSurveyResult.objects.filter(user=request.user).exists():
-        messages.info(request, "You have already completed the initial survey.")
+        #messages.info(request, "You have already completed the initial survey.")
         return redirect("survey_dashboard")
 
     if request.method == "POST":
@@ -342,7 +436,7 @@ def initial_survey(request):
                 setattr(survey, key, value)
 
             survey.save()
-            messages.success(request, "Initial survey completed successfully!")
+            #messages.success(request, "Initial survey completed successfully!")
             return redirect("survey_dashboard")
     else:
         form = InitialSurveyForm()
@@ -382,7 +476,7 @@ def weekly_checkup(request):
                 setattr(checkup, key, value)
 
             checkup.save()
-            messages.success(request, "Weekly checkup completed successfully!")
+            #messages.success(request, "Weekly checkup completed successfully!")
             return redirect("survey_dashboard")
     else:
         form = WeeklyCheckupForm()

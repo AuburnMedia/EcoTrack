@@ -29,6 +29,12 @@
         <p>Survey</p>
       </a>
     </li>
+    <li class="nav-item">
+      <a href="{% url 'profile' %}" class="nav-link {% if segment == 'profile' %} active {% endif %}">
+        <i class="nav-icon fas fa-user-circle"></i>
+        <p>Profile</p>
+      </a>
+    </li>
     {% endif %}
     <!-- Authentication -->
     {% if request.user.is_authenticated %}

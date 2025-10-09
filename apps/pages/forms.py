@@ -33,6 +33,45 @@ class UserOnboardingForm(forms.ModelForm):
             raise forms.ValidationError("Household size must be at least 1")
         return household_size
 
+    def clean_carbon_goal(self):
+        carbon_goal = self.cleaned_data.get("carbon_goal")
+        if carbon_goal is not None and carbon_goal < 0:
+            raise forms.ValidationError("Carbon goal must be zero or a positive number")
+        return carbon_goal
+
+
+class UserProfileForm(UserOnboardingForm):
+    class Meta(UserOnboardingForm.Meta):
+        widgets = {
+            "display_name": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "How should we address you?",
+                }
+            ),
+            "household_size": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Number of people in your household",
+                    "min": "1",
+                }
+            ),
+            "house_type": forms.RadioSelect(
+                attrs={
+                    "class": "d-none card-radio-input",
+                    "data-behaviour": "card-radio",
+                }
+            ),
+            "carbon_goal": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Monthly carbon goal in kg of CO₂",
+                    "min": "0",
+                    "step": "50",
+                }
+            ),
+        }
+
 
 class InitialSurveyForm(forms.ModelForm):
     class Meta:

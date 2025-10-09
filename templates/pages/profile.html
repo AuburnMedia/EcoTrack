@@ -1,0 +1,296 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %}Your Profile{% endblock title %}
+
+{% block extrastyle %}
+<style>
+  .selectable-card {
+    cursor: pointer;
+    border: 1px solid #e3e6f0;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  }
+  .selectable-card .icon {
+    color: #6c757d;
+  }
+  .selectable-card .card-body {
+    pointer-events: none;
+  }
+  .selectable-card.active,
+  .selectable-card.border-primary {
+    border-color: #007bff;
+    transform: translateY(-2px);
+  }
+  .selectable-card.active .icon,
+  .selectable-card.border-primary .icon {
+    color: #007bff !important;
+  }
+  .card-radio-input {
+    display: none;
+  }
+</style>
+{% endblock extrastyle %}
+
+{% block content %}
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0">Your EcoTrack Profile</h1>
+          <p class="text-muted">Tune your personal details and keep your sustainability goals on track.</p>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}">Dashboard</a></li>
+            <li class="breadcrumb-item active">Profile</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-lg-7">
+          <div class="card card-primary card-outline shadow-sm mb-4">
+            <div class="card-header border-0">
+              <h3 class="card-title">Profile Preferences</h3>
+              <span class="badge badge-light text-primary">Personal</span>
+            </div>
+            <div class="card-body">
+              {% if messages %}
+                {% for message in messages %}
+                  <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                {% endfor %}
+              {% endif %}
+
+              <form method="post" novalidate>
+                {% csrf_token %}
+                <div class="form-group">
+                  <label for="{{ form.display_name.id_for_label }}" class="font-weight-bold">Display name</label>
+                  {{ form.display_name }}
+                  {% if form.display_name.errors %}
+                    <span class="text-danger small d-block mt-1">{{ form.display_name.errors|striptags }}</span>
+                  {% else %}
+                    <small class="form-text text-muted">We'll use this across EcoTrack experiences.</small>
+                  {% endif %}
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group col-sm-6">
+                    <label for="{{ form.household_size.id_for_label }}" class="font-weight-bold">Household size</label>
+                    {{ form.household_size }}
+                    {% if form.household_size.errors %}
+                      <span class="text-danger small d-block mt-1">{{ form.household_size.errors|striptags }}</span>
+                    {% else %}
+                      <small class="form-text text-muted">How many people share this footprint?</small>
+                    {% endif %}
+                  </div>
+                  <div class="form-group col-sm-6">
+                    <label for="{{ form.carbon_goal.id_for_label }}" class="font-weight-bold">Monthly carbon goal (kg CO₂)</label>
+                    {{ form.carbon_goal }}
+                    {% if form.carbon_goal.errors %}
+                      <span class="text-danger small d-block mt-1">{{ form.carbon_goal.errors|striptags }}</span>
+                    {% else %}
+                      <small class="form-text text-muted">Aim for a monthly target that feels challenging but achievable.</small>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="font-weight-bold d-block mb-3">Home type</label>
+                  {% with current_value=form.house_type.value|default:profile.house_type %}
+                    <div class="row">
+                      {% for radio in form.house_type %}
+                        <div class="col-md-4 mb-3">
+                          <label class="card selectable-card h-100 mb-0 {% if radio.choice_value|stringformat:'s' == current_value|stringformat:'s' %}active{% endif %}">
+                            {{ radio.tag }}
+                            <div class="card-body text-center">
+                              <div class="icon mb-2">
+                                {% if radio.choice_value == 'APT' %}
+                                  <i class="fas fa-city fa-2x"></i>
+                                {% elif radio.choice_value == 'SMALL' %}
+                                  <i class="fas fa-home fa-2x"></i>
+                                {% else %}
+                                  <i class="fas fa-warehouse fa-2x"></i>
+                                {% endif %}
+                              </div>
+                              <h5 class="font-weight-bold mb-1">{{ radio.choice_label }}</h5>
+                              <p class="text-muted small mb-0">Select to tailor calculations</p>
+                            </div>
+                          </label>
+                        </div>
+                      {% endfor %}
+                    </div>
+                  {% endwith %}
+                  {% if form.house_type.errors %}
+                    <span class="text-danger small d-block mt-1">{{ form.house_type.errors|striptags }}</span>
+                  {% endif %}
+                </div>
+
+                <div class="d-flex justify-content-end mt-4">
+                  <a href="{% url 'index' %}" class="btn btn-outline-secondary mr-2">Cancel</a>
+                  <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-5">
+          <div class="card shadow-sm mb-4">
+            <div class="card-body">
+              <div class="d-flex align-items-center mb-3">
+                <div class="rounded-circle bg-gradient-primary d-flex align-items-center justify-content-center" style="width:56px;height:56px;">
+                  <span class="text-white font-weight-bold">{{ request.user.first_name|default:request.user.username|slice:":1"|upper }}</span>
+                </div>
+                <div class="ml-3">
+                  <h4 class="mb-0">{{ profile.display_name|default:request.user.get_full_name|default:request.user.username }}</h4>
+                  <small class="text-muted">Member since {{ request.user.date_joined|date:"M Y" }}</small>
+                </div>
+              </div>
+              <ul class="list-unstyled mb-0">
+                <li class="d-flex justify-content-between py-2 border-bottom">
+                  <span class="text-muted">Email</span>
+                  <span class="font-weight-bold">{{ request.user.email|default:"—" }}</span>
+                </li>
+                <li class="d-flex justify-content-between py-2 border-bottom">
+                  <span class="text-muted">Household size</span>
+                  <span class="font-weight-bold">{{ profile.household_size }}</span>
+                </li>
+                <li class="d-flex justify-content-between py-2">
+                  <span class="text-muted">Home type</span>
+                  <span class="font-weight-bold">{{ profile.get_house_type_display }}</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="card card-outline card-success shadow-sm mb-4">
+            <div class="card-header border-0">
+              <h3 class="card-title mb-0">Carbon goal status</h3>
+            </div>
+            <div class="card-body">
+              {% if current_goal %}
+                <div class="d-flex align-items-center mb-3">
+                  <div class="mr-3">
+                    <span class="badge badge-success p-3">Target</span>
+                  </div>
+                  <div>
+                    <h5 class="mb-0">{{ current_goal.target_amount|default_if_none:0|floatformat:0 }} kg CO₂</h5>
+                    <small class="text-muted">Current monthly goal</small>
+                  </div>
+                </div>
+
+                {% if goal_progress is not None %}
+                  <p class="text-muted mb-2">Progress vs target</p>
+                  <div class="progress mb-2" style="height:8px;">
+                    <div class="progress-bar bg-success" role="progressbar" data-progress="{{ goal_progress|floatformat:0 }}" aria-valuenow="{{ goal_progress|floatformat:0 }}" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                  <p class="mb-0 font-weight-bold">{{ goal_progress|floatformat:1 }}% of goal achieved</p>
+                {% else %}
+                  <p class="text-muted">Complete a weekly checkup to start tracking your goal progress.</p>
+                {% endif %}
+
+                {% if last_checkup %}
+                  <div class="alert alert-light border mt-3 mb-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                        <h6 class="mb-1">Latest estimate</h6>
+                        <p class="mb-0 text-muted">{{ last_checkup.monthly_estimate|floatformat:1 }} kg CO₂</p>
+                      </div>
+                      <span class="badge badge-info">{{ last_checkup.date_submitted|date:"d M" }}</span>
+                    </div>
+                  </div>
+                {% endif %}
+              {% else %}
+                <p class="text-muted">Set a goal to unlock tailored recommendations.</p>
+                <a href="{% url 'manage_carbon_goal' %}" class="btn btn-sm btn-success">Create goal</a>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="card shadow-sm">
+            <div class="card-header border-0">
+              <h3 class="card-title mb-0">Recent activity</h3>
+            </div>
+            <div class="card-body">
+              {% if initial_survey %}
+                <div class="media align-items-center mb-3">
+                  <span class="btn btn-outline-primary btn-sm rounded-circle mr-3">
+                    <i class="fas fa-poll"></i>
+                  </span>
+                  <div class="media-body">
+                    <h6 class="mb-0">Initial survey</h6>
+                    <small class="text-muted">Completed {{ initial_survey.date_submitted|date:"M d, Y" }}</small>
+                  </div>
+                </div>
+              {% else %}
+                <div class="alert alert-info">You haven't completed the initial survey yet. <a href="{% url 'initial_survey' %}">Start now</a>.</div>
+              {% endif %}
+
+              {% if last_checkup %}
+                <div class="media align-items-center">
+                  <span class="btn btn-outline-success btn-sm rounded-circle mr-3">
+                    <i class="fas fa-leaf"></i>
+                  </span>
+                  <div class="media-body">
+                    <h6 class="mb-0">Weekly check-up</h6>
+                    <small class="text-muted">{{ time_since_last_checkup }} days ago</small>
+                  </div>
+                </div>
+              {% else %}
+                <div class="alert alert-warning mb-0">No weekly checkups yet. <a href="{% url 'weekly_checkup' %}">Complete your first</a>.</div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock content %}
+
+{% block extra_scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const cards = document.querySelectorAll('.selectable-card');
+    cards.forEach(function (card) {
+      const input = card.querySelector('input[type="radio"]');
+      if (!input) { return; }
+
+      const applyState = () => {
+        cards.forEach(c => {
+          c.classList.remove('border-primary', 'shadow-sm', 'bg-light', 'active');
+        });
+        if (input.checked) {
+          card.classList.add('border-primary', 'shadow-sm', 'bg-light', 'active');
+        }
+      };
+
+      card.addEventListener('click', function () {
+        input.checked = true;
+        input.dispatchEvent(new Event('change'));
+        applyState();
+      });
+
+      input.addEventListener('change', applyState);
+      if (input.checked) {
+        applyState();
+      }
+    });
+
+    document.querySelectorAll('.progress-bar[data-progress]').forEach(function (bar) {
+      const progress = parseFloat(bar.dataset.progress || '0');
+      bar.style.width = Math.max(0, Math.min(100, progress)) + '%';
+    });
+  });
+</script>
+{% endblock extra_scripts %}
