@@ -79,7 +79,23 @@
                 </div>
             </div>
 
-            
+            <!-- Weekly Progress Chart -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Weekly Progress Chart</h3>
+                        </div>
+                        <div class="card-body">
+                            {% if weekly_checkups %}
+                            <canvas id="weeklyProgressChart"></canvas>
+                            {% else %}
+                            <div class="alert alert-info">Complete weekly checkups to see your progress chart.</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- Recent Weekly Checkups -->
             <div class="row">

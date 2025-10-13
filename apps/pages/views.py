@@ -260,15 +260,6 @@ def survey_dashboard(request):
         "-date_submitted"
     )[:12]
 
-    initial_survey = (
-        InitialSurveyResult.objects.filter(user=request.user)
-        .order_by("-date_submitted")
-        .first()
-    )
-    weekly_checkups = WeeklyCheckupResult.objects.filter(user=request.user).order_by(
-        "-date_submitted"
-    )[:12]
-
     # Prepare chart data with better error handling
     chart_data = {
         "labels": [
@@ -353,11 +344,6 @@ def initial_survey(request):
 @login_required
 @onboarding_required
 def weekly_checkup(request):
-    last_checkup = (
-        WeeklyCheckupResult.objects.filter(user=request.user)
-        .order_by("-date_submitted")
-        .first()
-    )
     last_checkup = (
         WeeklyCheckupResult.objects.filter(user=request.user)
         .order_by("-date_submitted")
