@@ -54,7 +54,30 @@ py manage.py runserver
 
 The site should be accessible at http://127.0.0.1:8000/.
 
+## Testing
 
+EcoTrack includes a comprehensive test suite with 62 tests covering all major features and components.
+
+### Run all tests:
+```bash
+python manage.py test apps.pages.tests apps.charts.tests
+```
+
+### Run specific app tests:
+```bash
+# Pages app tests only
+python manage.py test apps.pages.tests
+
+# Charts app tests only
+python manage.py test apps.charts.tests
+```
+
+### Run with verbose output:
+```bash
+python manage.py test apps.pages.tests apps.charts.tests -v 2
+```
+
+For detailed test coverage information, see [TEST_SUMMARY.md](TEST_SUMMARY.md).
 
 ## License
 
