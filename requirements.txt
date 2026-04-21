@@ -1,6 +1,6 @@
 # Core
 django==4.2.25
-python-dotenv==1.0.1
+python-dotenv==1.2.2
 str2bool==1.1
 
 # UI & Admin UI
